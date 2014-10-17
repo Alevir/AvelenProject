@@ -1,0 +1,4 @@
+#names of physic objects' templates
+Sword {Mеч}
+Helm {Шлем}
+Player {Игрок}
