@@ -22,6 +22,7 @@
 #include "TGUI/TGUI.hpp"
 #include "AVector2.h"
 #include <set>
+#include "AObject.h"
 class AWorldBase;
 class GuiWindowBase;
 class WorldMode;
@@ -48,12 +49,12 @@ public:
 };
 
 
-class GuiWindowBase {
+class GuiWindowBase : public RemovableObject {
   friend class GGUI;
 protected:
-  GGUI& Gui;
   virtual void Show() = 0;
 public:
+  GGUI& Gui;
   virtual void Hide() = 0;
   GuiWindowBase(GGUI& gui) : Gui(gui) {}
 
@@ -64,10 +65,10 @@ protected:
   AVector2 _initPos;
   tgui::ChildWindow::Ptr mWindow;
   virtual void _onClose();
-
+  void Show();
 public:
   GuiWindow(GGUI& gui);
-  void Show();
+
   void Hide();
   void SwitchVisibility();
   bool IsVisible() { return mWindow->isVisible(); }

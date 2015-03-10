@@ -28,6 +28,7 @@
 #include <map>
 #include <list>
 #include <set>
+typedef long long unsigned int UniqueID;
 
 #include "const.h"
 
@@ -113,7 +114,7 @@ protected:
   virtual void RemoveObject(APhysicObjectBase* obj);
 
   AIDManager<APhysicObjectBase> idManager;
-  AIDManagerReduced scriptIDManager;
+  UniqueIDManager uniqueIDManager;
   ACharacterBase* player = 0;
   b2World* physicWorld;
   AScriptWrapper* scriptWrapper = 0;

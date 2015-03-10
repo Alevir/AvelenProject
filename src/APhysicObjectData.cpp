@@ -150,7 +150,7 @@ APhysicObjectData::APhysicObjectData(libconfig::Setting &data) : Material(Game::
 
 }
 
-void APhysicObjectData::print(std::ostream& stream) const {
+void APhysicObjectData::Print(std::ostream& stream) const {
   stream<<"--------AObjectData--------\n";
   stream<<"name: "<<templateName<<'\n';
   //stream<<"type: "<<fixtureType<<'\n';

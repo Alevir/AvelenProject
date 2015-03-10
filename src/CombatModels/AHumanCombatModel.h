@@ -31,8 +31,8 @@
 class AHumanCombatModel
     : public ACombatModelBase {
   friend class PositionChangeAction;
-  HitData DealDamage(const AttackData& attack);
-  void RecieveDamage(const HitData& hit);
+  HitData dealDamage(const AttackData& attack);
+  void recieveDamage(const HitData& hit);
   virtual void GenerateAction(int type);
   void handleArmorDamage(APhysicObjectBase* armor, APhysicObjectBase* weapon, double &damage);
   const double HeadHitMultiplier = 3.0;
@@ -42,7 +42,7 @@ class AHumanCombatModel
   const int ChangePositionIndex = 0;
   const int AttackIndex = 1;
 public:
-  AHumanCombatModel(ACharacterBase* character);
+  AHumanCombatModel(ACharacterBase* mCharacter);
   void subStep(double dt);
   unsigned int GetType() const { return (unsigned int)(CombatModels::Human); }
   int GetAttackPossition() const  { return (int)(AttackPosition); }

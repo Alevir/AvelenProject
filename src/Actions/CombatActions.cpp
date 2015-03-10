@@ -60,7 +60,7 @@ bool AttackAction::process(b2Fixture *fixture) {
   if(!c) return false;
   AttackData a;
   a.Pos = pos;
-  character->combatModel->Attack(c, a);
+  character->mCombatModel->Attack(c, a);
   return true;
 }
 

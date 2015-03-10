@@ -36,10 +36,10 @@ class AGroundCell;
 
 
 struct ContextLocArgs {
-  double sx = 0;      //shifts
-  double sy = 0;
-  int lx = 0;     // position of location in the world
-  int ly = 0;
+  double Sx = 0;      //the shifts
+  double Sy = 0;
+  int Lx = 0;     // position of the location in the world
+  int Ly = 0;
 };
 
 class ALocationBase {
@@ -66,26 +66,23 @@ protected:
   int mly;
 
 
-  AGroundCell*** ground;
+  AGroundCell*** mGround;
   static std::map<std::string, AGroundCell*> scriptGroundContainer;
-  std::vector<AGroundCell*> _loadingArray;
-  std::map<AGroundCell*, unsigned int> _savingMap;
-  std::vector<std::string> _nameMap;
+  std::vector<AGroundCell*> mLoadingArray;
+  std::map<AGroundCell*, unsigned int> mSavingMap;
+  std::vector<std::string> mNameMap;
 
-  //static std::map<unsigned int, AGroundCell*> loadGroundMap;
-  //static std::vector<AGroundCell*> loadGroundMap;
-  //static std::map<AGroundCell*, unsigned int>  saveGroundMap;
-  int XLen = 0;
-  int YLen = 0;
+  int mXLen = 0;
+  int mYLen = 0;
   const double cellSize = 1.0;
 
-  std::set<APhysicObjectBase*> localObjects;
-  std::set<ACharacterBase*> localCharacters;
+  std::set<APhysicObjectBase*> mLocalObjects;
+  std::set<ACharacterBase*> mLocalCharacters;
   AWorldBase* world;
   void loadLocationFromCfg(libconfig::Config& c, const ContextLocArgs& la = ContextLocArgs());
   //virtual void loadGroundCells(const std::string& iLocationFileName) = 0;
   const std::string savePath = "../resources/locations/";
-  ALocationScriptContent scrCont;
+  ALocationScriptContent mScrCont;
 
 
   inline ALocationBase* boundsTest(APhysicObjectBase* obj, int& x, int& y);
@@ -95,14 +92,14 @@ protected:
 
 
 public:
-  int GetXSize() { return XLen; }
-  int GetYSize() { return YLen; }
+  int GetXSize() { return mXLen; }
+  int GetYSize() { return mYLen; }
   int GetLocPositionX() { return mlx; }
   int GetLocPositionY() { return mly; }
   virtual ~ALocationBase();
   ALocationBase(AWorldBase* iWorld);
 
-  ALocationScriptContent& GetScriptContent() { return scrCont; }
+  ALocationScriptContent& GetScriptContent() { return mScrCont; }
   void Save(const std::string& iFileName);
   APhysicObjectBase* AddObject(std::string iTemplateName, ObjectInitArgs& args);
   APhysicObjectBase* AddObject(std::string iTemplateName, APhysicObjectBase* container,  ObjectInitArgs& args);

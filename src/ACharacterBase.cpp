@@ -33,6 +33,14 @@
 #include "ALocationBase.h"
 
 
+std::string MoveStateNames[] = {
+  "Idle",
+  "MoveForward",
+  "MoveBack",
+  "MoveRight",
+  "MoveLeft",
+  "Attack"
+};
 
 std::string SlotName[] = {
   "Head",
@@ -51,20 +59,20 @@ std::string SlotName[] = {
   };
 
 void ACharacterBase::SetController(AControllerBase *iController) {
-  if(controller) {
-    delete controller;
+  if(mController) {
+    delete mController;
   }
-  controller = iController;
+  mController = iController;
 }
 
 
 AControllerBase* ACharacterBase::GetController() {
-  return controller;
+  return mController;
 }
 
 
 bool ACharacterBase::SwitchController() {
-  return controller->Switch();
+  return mController->Switch();
 }
 
 bool ACharacterBase::AddObjectToBag(APhysicObjectBase *obj) {
@@ -90,14 +98,14 @@ void ACharacterBase::GetObjectFromBag(APhysicObjectBase *obj) {
 }
 
 void ACharacterBase::AddEffect(const EffectData& ed) {
-  auto it = effects.begin();
-  it = effects.find(ed.Name);
-  if(it != effects.end()) {
+  auto it = mEffects.begin();
+  it = mEffects.find(ed.Name);
+  if(it != mEffects.end()) {
     it->second->Add(ed);
     return;
   }
   Effect* ef = Effect::CreateEffect(ed, this);
-  effects.insert(std::make_pair(ef->EffectName, ef));
+  mEffects.insert(std::make_pair(ef->EffectName, ef));
 }
 
 
@@ -113,20 +121,20 @@ bool ACharacterBase::DrinkPotion(APhysicObjectBase *potion) {
 
 void ACharacterBase::Step(double dt) {
   APhysicObjectBase::Step(dt);
-  if(HP < maxHP)
-    HP += 0.05 * reg * world->GetLogicFrameLength() / SECOND;
-  if(EP < maxEP)
-    EP += reg * world->GetLogicFrameLength() / SECOND;
+  if(mHP < mMaxHP)
+    mHP += 0.05 * mReg * world->GetLogicFrameLength() / SECOND;
+  if(mEP < mMaxEP)
+    mEP += mReg * world->GetLogicFrameLength() / SECOND;
 
-  if(controller) {
-    controller->Step(dt);
+  if(mController) {
+    mController->Step(dt);
   }
-  if(combatModel) {
-    combatModel->Step(dt);
+  if(mCombatModel) {
+    mCombatModel->Step(dt);
   }
-  auto it = actions.begin();
+  auto it = mActions.begin();
   decltype(it) eit;
-  while(it != actions.end()) {
+  while(it != mActions.end()) {
     (*it)->GetDuration() -= dt;
     if( (*it)->GetDuration() < 0 ) {
       eit = it;
@@ -134,14 +142,14 @@ void ACharacterBase::Step(double dt) {
       (*eit)->Activate();
       //std::cout << "Activated \n";
       //delete *eit;
-      actions.erase(eit);
+      mActions.erase(eit);
     } else {
       it++;
     }
   }
-  auto efit = effects.begin();
+  auto efit = mEffects.begin();
   decltype(efit) eefit;
-  while(efit != effects.end()) {
+  while(efit != mEffects.end()) {
     //std::cerr << efit->second->EffectName + ": " << efit->second->GetDuration() << '\n';
     efit->second->GetDuration() -= dt;
     efit->second->Step(dt);
@@ -149,31 +157,31 @@ void ACharacterBase::Step(double dt) {
       eefit = efit;
       efit++;
       eefit->second->Activate();
-      effects.erase(eefit);
+      mEffects.erase(eefit);
       delete eefit->second;
     } else {
       efit++;
     }
   }
-  if(HP > maxHP) HP = maxHP;
-  if(EP > maxEP) EP = maxEP;
+  if(mHP > mMaxHP) mHP = mMaxHP;
+  if(mEP > mMaxEP) mEP = mMaxEP;
 
 }
 
 ACharacterBase::ACharacterBase(const ACharacterData* data, ALocationBase* loc, const ObjectInitArgs& args)
-    : race(data->Race), APhysicObjectBase(data, loc, args){
+    : mRace(data->Race), APhysicObjectBase(data, loc, args){
   for(int i = 0; i < InventorySize; i++) {
     Slots[i] = 0;
   }
 
-  (data->Level < 0.0) ? (XP = 0.0) : (XP = data->Level);
-  (data->Str < 0.0) ? (str = race->Str + race->StrGain * XP) : (str = data->Str);
-  (data->Acc < 0.0) ? (acc = race->Acc + race->AccGain * XP) : (acc = data->Acc);
-  (data->Reg < 0.0) ? (reg = race->Reg + race->RegGain * XP) : (reg = data->Reg);
-  (data->MaxHP < 0.0) ? (maxHP = race->InitHP + str) : (maxHP = data->MaxHP);
-  (data->MaxEP < 0.0) ? (maxEP = race->InitEP + str) : (maxEP = data->MaxEP);
-  HP = maxHP;
-  EP = maxEP;
+  (data->Level < 0.0) ? (mXP = 0.0) : (mXP = data->Level);
+  (data->Str < 0.0) ? (mStr = mRace->Str + mRace->StrGain * mXP) : (mStr = data->Str);
+  (data->Acc < 0.0) ? (mAcc = mRace->Acc + mRace->AccGain * mXP) : (mAcc = data->Acc);
+  (data->Reg < 0.0) ? (mReg = mRace->Reg + mRace->RegGain * mXP) : (mReg = data->Reg);
+  (data->MaxHP < 0.0) ? (mMaxHP = mRace->InitHP + mStr) : (mMaxHP = data->MaxHP);
+  (data->MaxEP < 0.0) ? (mMaxEP = mRace->InitEP + mStr) : (mMaxEP = data->MaxEP);
+  mHP = mMaxHP;
+  mEP = mMaxEP;
 
 }
 
@@ -194,24 +202,24 @@ void ACharacterBase::Destroy() {
 
 ACharacterBase::~ACharacterBase() {
 
-  if(combatModel) delete combatModel;
-  if(controller) delete controller;
-  for(auto p : effects) {
+  if(mCombatModel) delete mCombatModel;
+  if(mController) delete mController;
+  for(auto p : mEffects) {
     delete p.second;
   }
 
 }
 
 const std::map<std::string, Effect *> &ACharacterBase::GetEffects() {
-  return effects;
+  return mEffects;
 }
 
 void ACharacterBase::AddXP(double value) {
-  str += race->StrGain * value;
-  acc += race->AccGain * value;
-  reg += race->RegGain * value;
-  maxHP += race->StrGain * value;
-  maxEP += race->StrGain * value;
+  mStr += mRace->StrGain * value;
+  mAcc += mRace->AccGain * value;
+  mReg += mRace->RegGain * value;
+  mMaxHP += mRace->StrGain * value;
+  mMaxEP += mRace->StrGain * value;
 }
 
 
@@ -295,20 +303,20 @@ void ACharacterBase::Equip(APhysicObjectBase* obj, ) {
 }*/
 
 void ACharacterBase::AddAction(Action *action) {
-  actions.insert(action);
+  mActions.insert(action);
 }
 
 void ACharacterBase::SetCombatModel(ACombatModelBase* model) {
-  combatModel = model;
+  mCombatModel = model;
 }
 
 void ACharacterBase::SetControllerState(bool enabled) {
-  controller->SetEnabled(enabled);
+  mController->SetEnabled(enabled);
 }
 
 
 void ACharacterBase::Print() {
-std::cout << "pointer: " << this << " Health: " << HP << std::endl;
+std::cout << "pointer: " << this << " Health: " << mHP << std::endl;
   for(int i = 0; i < InventorySize; i++) {
     std::cout << SlotName[i] << " ";
     APhysicObjectBase* obj = Slots[i];

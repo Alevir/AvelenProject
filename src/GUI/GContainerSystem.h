@@ -34,7 +34,9 @@ class GPlayerInventory;
 class GGUI;
 
 class GContainerSystem {
+
 protected:
+  std::vector<GContainer*> mForRemoval;
   GGUI& gui;
   friend class GContainer;
   friend class GInventory;
@@ -51,15 +53,16 @@ protected:
   GInventory* invSource;
   APhysicObjectBase* trObj = 0;
 
-  void _deleteContainer(APhysicObjectBase* objKey);
-  void _deleteInventory(ACharacterBase* chKey);
+  /*void _deleteContainer(APhysicObjectBase* objKey);
+  void _deleteInventory(ACharacterBase* chKey);*/
 
-  bool _used = false; //were any actions performed or not, need for dropping
+  bool _used = false; //were any actions performed or not, needs for dropping
   virtual void _checkAndDrop() = 0;
   InventorySlot getSourceSlot();
 
 public:
   double TransferDistance = 1.0e200;
+  void ClearStep();
 
   void CheckAndDrop();
 
@@ -96,12 +99,13 @@ public:
 
 class GInGameContainerSystem : public GContainerSystem {
   void _checkAndDrop();
-  ACharacterBase* mPlayer;
-  GPlayerInventory* mPLI;
+  GPlayerInventory* mPLI = 0;
+  friend class GPlayerInventory;
+  void removePlayerInventory();
+
 public:
-  void CloseAll();
-  GInGameContainerSystem(GGUI& iGui, ACharacterBase* player);
-  void SetPlayer(ACharacterBase* player) { mPlayer = player; }
+  GInGameContainerSystem(GGUI& iGui);
+  void AddPlayerInventory(ACharacterBase* player);
 
   GPlayerInventory* GetPlayerInventory() { return mPLI; }
   ~GInGameContainerSystem();

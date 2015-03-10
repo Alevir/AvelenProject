@@ -49,6 +49,9 @@ void AAnimationContainer::LoadAnimations(const char* dirPath) {
       AAnimation& a = _loaded[std::string((const char*)s["name"])];
       a._sprites = std::make_shared<std::vector<ASprite> >();
       a._sprites->resize(l);
+      if(s.lookupValue("property", a.property)) {
+        a.property = a.property / PIXELS_IN_METER;
+      }
 
       for(int j = 0; j < l; j++) {
         sf::Sprite& spr = a._sprites->operator [](j);
@@ -90,12 +93,17 @@ ASprite* AAnimation::Step(double dt) {
   }
   //size_t s = curTime / length * _sprites->size();
   //std::cerr << "index " << s << '\n';
-  return &_sprites->operator [](size_t(curTime / length * _sprites->size()));
+  return &((*_sprites)[size_t(curTime / length * _sprites->size())]);
 }
 
 void AAnimation::SetTime(double t) {
   if(t > 1.0 || t < 0.0) throw std::logic_error("wrong time");
   curTime = length * t;
+}
+
+void AAnimation::SetLength(double l) {
+  curTime = curTime * l / length;
+  length = l;
 }
 
 void AAnimation::Reset() {

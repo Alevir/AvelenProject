@@ -65,11 +65,11 @@ void ALocationSFML::Display() {
   int ry = (ASprite::cdy - msy + ASprite::renderRadius) / cellSize;
   if(lx < 0) lx = 0;
   if(ly < 0) ly = 0;
-  if(rx > XLen) rx = XLen;
-  if(ry > YLen) ry = YLen;
+  if(rx > mXLen) rx = mXLen;
+  if(ry > mYLen) ry = mYLen;
   for(int y = ly; y < ry; y++) {
     for(int x = lx; x < rx; x++) {
-      ASprite* spr = ground[x][y]->sprite;
+      ASprite* spr = mGround[x][y]->Sprite;
       spr->setPosition(cellSize * (x + 0.5 + msx) * PIXELS_IN_METER , -(cellSize * (y + 0.5 + msy) * PIXELS_IN_METER) );
       Game::Window->draw(*spr);
     }

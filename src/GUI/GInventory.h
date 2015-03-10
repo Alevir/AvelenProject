@@ -72,19 +72,23 @@ protected:
   InventorySlot GetSourceSlot();
   APhysicObjectBase* GetSourceObject();
   void SetBag(APhysicObjectBase* bag);
-
+  ~GInventory();
+  GInventory(ACharacterBase* ch, GGUI& iGui, GContainerSystem* iCs);
 public:
   ACharacterBase* GetCharacter() { return character; }
   void Refresh();
-  GInventory(ACharacterBase* ch, GGUI& iGui, GContainerSystem* iCs);
-  ~GInventory();
+
+
 };
 
 
 class GPlayerInventory : public GInventory {
   void _onClose();
+
 public:
+  void Hide();
   GPlayerInventory(ACharacterBase* ch, GGUI& iGui, GContainerSystem* iCs);
+  ~GPlayerInventory();
 };
 
 

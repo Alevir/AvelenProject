@@ -24,13 +24,12 @@
 #include "Mode.h"
 
 void GuiWindow::_onClose() {
-  mWindow->hide();
-  Gui.OnHideOrClose(this);
+  Hide();
 }
 
 GuiWindow::GuiWindow(GGUI& gui) : GuiWindowBase(gui), mWindow(gui.Gui) {
-mWindow->hide();
-mWindow->bindCallback(&GuiWindow::_onClose, this, tgui::ChildWindow::Closed);
+  mWindow->hide();
+  mWindow->bindCallback(&GuiWindow::_onClose, this, tgui::ChildWindow::Closed);
   mWindow->load(Game::GuiConfFileName);
   mWindow->setPosition(200, 200);
   mWindow->setSize(400, 400);
@@ -42,12 +41,16 @@ void GuiWindow::Show() {
 }
 
 void GuiWindow::Hide() {
-  mWindow->hide();
   Gui.OnHideOrClose(this);
+  mWindow->destroy();
 }
 
+
+
+
 void GuiWindow::SwitchVisibility() {
-if(mWindow->isVisible()) mWindow->hide();
+  assert(0);
+  if(mWindow->isVisible()) mWindow->hide();
   else mWindow->show();
 }
 
@@ -245,12 +248,17 @@ void GGUI::Show(GuiWindowBase* w) {
 
 bool GGUI::OnHideOrClose(GuiWindowBase* w) {
   auto it = mWin.find(w);
-  if(it == mWin.end()) throw std::logic_error("window not found");
+  if(it == mWin.end())  {
+    //dout << L"множественное удаление окна из GGUI\n";
+    throw std::logic_error("");
+  }
+    //throw std::logic_error("window not found");
   mWin.erase(it);
   if(mGM == GM_InGame && mWin.empty() && mWorld) {
     mWorld->GetPlayer()->SwitchController();
     Game::Window->setMouseCursorVisible(false);
   }
+  //w->Hide();
   return mWin.empty();
 }
 

@@ -23,7 +23,7 @@
 
 #include "ASpriteData.h"
 
-void ASpriteData::print(std::ostream &stream) const {
+void ASpriteData::Print(std::ostream &stream) const {
   stream<<"--------ASpriteData--------\n";
   stream<<"name: "<<name<<'\n';
   stream<<"imagePath: "<<imagePath<<'\n';

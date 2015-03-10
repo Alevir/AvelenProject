@@ -28,7 +28,7 @@
 
 AStackPointer<Mode> Mode::_modes;
 
-Mode::Mode() : window(Game::Window), mgui(*window), control(mgui),  debug(control), MessageManager(control) {
+Mode::Mode() : window(Game::Window), mgui(*window), control(mgui),  debug(control)/*, MessageManager(control)*/ {
   control.Gui.loadWidgetsFromFile(Game::GuiConfFileName);
   control.Gui.setGlobalFont(Game::DefaultFont);
   dout.Push(&debug);
@@ -38,6 +38,7 @@ void Mode::Run() {
   _modes.Push(this);
   _run();
   _modes.Pop();
+  trash.Clean();
 }
 
 

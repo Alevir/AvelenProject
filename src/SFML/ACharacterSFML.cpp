@@ -29,7 +29,7 @@
 
 void ACharacterSFML::Display(double dt) {
   APhysicObjectSFML::Display(dt);
-  sf::RectangleShape line(sf::Vector2f(100 * HP / maxHP, 5));
+  sf::RectangleShape line(sf::Vector2f(100 * mHP / mMaxHP, 5));
   line.setFillColor(sf::Color::Red);
   line.setOrigin(line.getSize().x / 2, line.getSize().y / 2);
   AVector2 v(0, -50.);
@@ -38,6 +38,14 @@ void ACharacterSFML::Display(double dt) {
   line.setPosition(v);
   line.setRotation(Game::Window->getView().getRotation());
   Game::Window->draw(line);
+  if(mCurMovState == MoveState::MoveForward || mCurMovState == MoveState::MoveBack) {
+    AAnimation* a = scheme->GetCurentAnim();
+    a->SetLength(a->GetProperty() / GetVelocityModulus());
+  }
+  if(mPrevMovState != mCurMovState) {
+    scheme->SetState(MoveStateNames[size_t(mCurMovState)]);
+    mPrevMovState = mCurMovState;
+  }
 }
 
 

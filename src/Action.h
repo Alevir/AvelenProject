@@ -35,28 +35,28 @@ public:
 
 class Action : public IAction {
 protected:
-  double _duration;
+  double mDuration;
 public:
-  Action(double duration, bool rep) : _duration(duration), IsRepeating(rep) {}
+  Action(double duration, bool rep) : mDuration(duration), IsRepeating(rep) {}
   const bool IsRepeating;
-  double& GetDuration() { return _duration; }
+  double& GetDuration() { return mDuration; }
 
-  void Remove() { _duration = -1.0; }
+  void Remove() { mDuration = -1.0; }
   virtual ~Action() {}
 };
 
 class DisposableAction : public Action {
 protected:
-  DisposableAction(double _duration);
+  DisposableAction(double mDuration);
 public:
   virtual void Step(double dt);
   virtual ~DisposableAction() {}
 };
 
 class RepeatingAction : public Action {
-  double _t = 0.0;
+  double mt = 0.0;
 public:
-  RepeatingAction(double _duration, double period);
+  RepeatingAction(double mDuration, double period);
   double Period;
   virtual void Step(double dt);
   virtual ~RepeatingAction() {}

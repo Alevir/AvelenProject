@@ -42,7 +42,7 @@ MovementAction* AKeyboardControllerSFML::mActions[] = {
 
 };*/
 
-void AKeyboardControllerSFML::Step(double dt) {
+void AKeyboardControllerSFML::subStep(double dt) {
   if(!_enabled) return;
   double MouseClickRelaxTime = SECOND / 4.0;
   double KeyRelaxTime = SECOND / 4.0;
@@ -58,47 +58,46 @@ void AKeyboardControllerSFML::Step(double dt) {
   sf::Mouse::setPosition(sf::Vector2i(x, 500), *Game::Window);
 
   if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-    MoveForward();
+    moveForward();
   }
   if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-    MoveBack();
+    moveBack();
   }
   if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-    MoveRight();
+    moveRight();
   }
   if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
     MoveLeft();
   }
 
   if(dx != 0) {
-    Turn((int)(dx /** Abs(dx) / 400*/));
+    turn((int)(dx /** Abs(dx) / 400*/));
   }
 
   if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-    Turn(RIGHT);
+    turn(RIGHT);
   }
   if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-    Turn(LEFT);
+    turn(LEFT);
   }
 
   if(sf::Mouse::isButtonPressed(sf::Mouse::Left) && t > MouseClickRelaxTime) {
     t = 0;
-    character->combatModel->GenerateAction(Strike);
+    character->mCombatModel->GenerateAction(Strike);
   }
   if(t1 > KeyRelaxTime) {
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::R) ) {
       t1 = 0;
-      character->combatModel->GenerateAction(HighHit);
+      character->mCombatModel->GenerateAction(HighHit);
     } else
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::F)) {
       t1 = 0;
-      character->combatModel->GenerateAction(MediumHit);
+      character->mCombatModel->GenerateAction(MediumHit);
     } else
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::V)) {
       t1 = 0;
-      character->combatModel->GenerateAction(LowHit);
+      character->mCombatModel->GenerateAction(LowHit);
     }
   }
 
-  CheckDirections(dt);
 }

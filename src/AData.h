@@ -28,7 +28,7 @@
 #include <ostream>
 
 struct AData {
-  virtual void print(std::ostream& stream) const = 0;
+  virtual void Print(std::ostream& stream) const = 0;
   virtual ~AData() {}
 };
 

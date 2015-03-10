@@ -31,6 +31,7 @@ class AAnimation {
   friend class AAnimationContainer;
   double length = 1.0;
   double curTime = 0.0;
+  double property = 0.0; // speed for move animations, duration for static animations
 
   std::shared_ptr<std::vector<ASprite> > _sprites;
 
@@ -41,6 +42,7 @@ public:
   void SetTime(double t);
   void SetLength(double l);
   double GetLength();
+  double GetProperty() { return property; }
   void Reset();
 };
 

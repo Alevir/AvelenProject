@@ -40,14 +40,13 @@
 
 void SinglePlayerMode::ResetPlayer() {
   ACharacterBase* player = world.GetPlayer();
-  GCS.SetPlayer(player);
   world.Camera.BindToObj(dynamic_cast<APhysicObjectSFML*>(player));
   Interface.SetPlayer(player);
   plInv = GCS.GetPlayerInventory();
   //world.GetPlayer()->SwitchController();
 }
 
-SinglePlayerMode::SinglePlayerMode() : GCS(control, world.GetPlayer()),
+SinglePlayerMode::SinglePlayerMode() : GCS(control),
 Interface(world.GetPlayer(), control) {
   debug.Switch();
   GCS.TransferDistance = 1.0;
@@ -56,6 +55,7 @@ Interface(world.GetPlayer(), control) {
   world.Camera.BindToObj(dynamic_cast<APhysicObjectSFML*>(world.GetPlayer()));
   world.Interface = &Interface;
   world.GetPlayer()->SwitchController();
+  GCS.AddPlayerInventory(world.GetPlayer());
   plInv = GCS.GetPlayerInventory();
   plInv->SetPosition(20, Game::Window->getSize().y / 3 - 50);
 }
@@ -144,12 +144,7 @@ void SinglePlayerMode::_run() {
             debug.Switch();
           } else
           if (event.key.code == sf::Keyboard::I) {
-            /*window->setMouseCursorVisible(!world.GetPlayer()->SwitchController());
-            guiHandles = !guiHandles;
-            plInv->SwitchVisibility();
-            if(!guiHandles) {
-              GCS.CloseAll();
-            }*/
+            control.Show(plInv);
           } else {
             control.HandleEvent(event);
           }
@@ -198,6 +193,8 @@ void SinglePlayerMode::_run() {
     Interface.SetFocusedObject(frc.GetFocusedObject());
 
     world.LogicStep();
+    GCS.ClearStep();
+    trash.Clean();
     //world.Camera.Step();
     world.GraphicStep();
 
@@ -205,6 +202,7 @@ void SinglePlayerMode::_run() {
     control.Gui.draw();
 
     window->display();
+
   }
   //world.Save("../testSave/test.save");
   //world.Save("../testSave/");

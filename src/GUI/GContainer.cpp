@@ -30,9 +30,7 @@
 #include "GInventory.h"
 
 void GContainer::_onClose() {
-  csystem->_deleteContainer(_obj);
-  mWindow->destroy();
-  Gui.OnHideOrClose(this);
+  csystem->RemoveContainer(_obj);
 }
 
 void GContainer::_pickObject() {
@@ -41,6 +39,11 @@ void GContainer::_pickObject() {
   csystem->trObj = _content[objList->getSelectedItemIndex()];
   csystem->sourceStatus = GContainerSystem::ContainerSource;
 
+}
+
+void GContainer::Hide() {
+  Gui.OnHideOrClose(this);
+  mWindow->destroy();
 }
 
 void GContainer::_putObject() {
@@ -57,7 +60,7 @@ void GContainer::_putObject() {
       try {
         csystem->contSource->_obj->TransferObject(_obj, csystem->trObj);
       } catch (APhysicObjectBase::ExContainerIsFull) {
-        Mode::GetCurrentMode().MessageManager.AddMessage(L"Container is full");
+        //Mode::GetCurrentMode().MessageManager.AddMessage(L"Container is full");
       }
     } else {
       throw GContainerSystem::ExLongDistance();
@@ -114,9 +117,12 @@ void GContainer::SetPosition(double x, double y) {
   mWindow->setPosition(x, y);
 }
 
+GContainer::~GContainer() {
+}
+
 
 GContainer::GContainer(APhysicObjectBase* obj, GGUI& iGui, GContainerSystem *iCs)
-    : GuiWindowBase(iGui), _obj(obj), csystem(iCs), mWindow(Gui.Gui), objList(*mWindow), lWeight(*mWindow), freeSpace(*mWindow) {
+  : GuiWindowBase(iGui), _obj(obj), csystem(iCs), mWindow(Gui.Gui), objList(*mWindow), lWeight(*mWindow), freeSpace(*mWindow) {
   mWindow->load(Game::GuiConfFileName);
   auto v = sf::Mouse::getPosition(*Game::Window);
   freeSpace->load(Game::GuiConfFileName);

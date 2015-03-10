@@ -28,10 +28,10 @@ RepeatingAction::RepeatingAction(double duration, double period) : Action(durati
 }
 
 void RepeatingAction::Step(double dt) {
-  _t+=dt;
-  if(_t > Period) {
+  mt+=dt;
+  if(mt > Period) {
     Activate();
-    _t -= Period;
+    mt -= Period;
   }
 }
 
@@ -41,7 +41,7 @@ DisposableAction::DisposableAction(double duration) : Action(duration, false) {
 }
 
 void DisposableAction::Step(double dt) {
-  if(_duration < 0.0) {
+  if(mDuration < 0.0) {
     Activate();
   }
 }

@@ -25,7 +25,12 @@
 #define AOBJECT_H
 
 typedef unsigned char byte;
-class AObject {
+
+class RemovableObject {
+
+};
+
+class AObject : public RemovableObject {
 
 public:
   virtual void Display(double dt) = 0;

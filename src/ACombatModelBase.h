@@ -37,13 +37,13 @@ struct HitData {
 
 class ACombatModelBase {
 protected:
-  ACharacterBase * const character;
-  virtual HitData DealDamage(const AttackData& attack) = 0;
-  virtual void RecieveDamage(const HitData& hit) = 0;
-  std::vector<Action*> actions;
+  ACharacterBase * const mCharacter;
+  virtual HitData dealDamage(const AttackData& attack) = 0;
+  virtual void recieveDamage(const HitData& hit) = 0;
+  std::vector<Action*> mActions;
   virtual void subStep(double dt) = 0;
-  double DecreaseHP(double value);
-  double DecreaseEP(double value);
+  double decreaseHP(double value);
+  double decreaseEP(double value);
 
   double& getHitPoints(APhysicObjectBase* obj) {
     return obj->HitPoints;

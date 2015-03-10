@@ -34,6 +34,7 @@ class AMaterialContainer;
 #include <string>
 #include <cstring>
 #include "AAnimationScheme.hpp"
+#include "AGarbageCollector.hpp"
 class ATranslationReader;
 class APotionRecipe;
 class AExtractionRecipe;

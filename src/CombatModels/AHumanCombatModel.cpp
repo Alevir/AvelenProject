@@ -29,19 +29,19 @@
 
 AHumanCombatModel::AHumanCombatModel(ACharacterBase *character)
     : ACombatModelBase(character) {
-  actions.resize(2, 0);
+  mActions.resize(2, 0);
 }
 
 void AHumanCombatModel::subStep(double dt) {
   
 }
 
-HitData AHumanCombatModel::DealDamage(const AttackData &attack) {
+HitData AHumanCombatModel::dealDamage(const AttackData &attack) {
   HitData d;
-  d.damage = character->Slots[IS_RightHand]->GetWeight() * 2.0 * character->GetStr() * character->GetEP() / character->GetMaxEP();
+  d.damage = mCharacter->Slots[IS_RightHand]->GetWeight() * 2.0 * mCharacter->GetStr() * mCharacter->GetEP() / mCharacter->GetMaxEP();
   //dout << d.damage;
   //dout << "\n";
-  d.attacker = character;
+  d.attacker = mCharacter;
   d.position = attack.Pos;
   return d;
 }
@@ -69,11 +69,11 @@ void AHumanCombatModel::handleArmorDamage(APhysicObjectBase* armor, APhysicObjec
 }
 
 
-void AHumanCombatModel::RecieveDamage(const HitData &hit) {
+void AHumanCombatModel::recieveDamage(const HitData &hit) {
   double damage = hit.damage;
   if(hit.position == HitPositionHead) {
     damage *= HeadHitMultiplier;
-    handleArmorDamage(character->Slots[IS_Head], hit.attacker->Slots[IS_RightHand], damage);
+    handleArmorDamage(mCharacter->Slots[IS_Head], hit.attacker->Slots[IS_RightHand], damage);
   } else
   if(hit.position == HitPositionBody) {
     damage *= BodyHitMultiplier;
@@ -82,7 +82,7 @@ void AHumanCombatModel::RecieveDamage(const HitData &hit) {
     r.addValue(IS_Gloves, 0.5);
     r.addValue(IS_Bracers, 0.5);
     r.addValue(IS_Spaulders, 0.5);
-    handleArmorDamage(character->Slots[r.getValue()], hit.attacker->Slots[IS_RightHand], damage);
+    handleArmorDamage(mCharacter->Slots[r.getValue()], hit.attacker->Slots[IS_RightHand], damage);
   } else
   if(hit.position == HitPositionLegs) {
     damage *= LegsHitMultiplier;
@@ -90,9 +90,9 @@ void AHumanCombatModel::RecieveDamage(const HitData &hit) {
     r.addValue(IS_Legs, 1.0);
     r.addValue(IS_Greaves, 0.5);
     r.addValue(IS_Feet, 0.5);
-    handleArmorDamage(character->Slots[r.getValue()], hit.attacker->Slots[IS_RightHand], damage);
+    handleArmorDamage(mCharacter->Slots[r.getValue()], hit.attacker->Slots[IS_RightHand], damage);
   }
-  DecreaseHP(damage);
+  decreaseHP(damage);
   dout << "damaged ";
   dout << damage;
   dout << '\n';
@@ -105,17 +105,17 @@ const int LowHit = 0;
 void AHumanCombatModel::GenerateAction(int type) {
   if (type < 0) return;
   if(type <= 2) {
-    if(actions[ChangePositionIndex] != 0) {
-      delete actions[ChangePositionIndex];
+    if(mActions[ChangePositionIndex] != 0) {
+      delete mActions[ChangePositionIndex];
     }
-    actions[ChangePositionIndex] = new PositionChangeAction(1.0 / 15.0, 0.9, int(type) + 0.5, this);
+    mActions[ChangePositionIndex] = new PositionChangeAction(1.0 / 15.0, 0.9, int(type) + 0.5, this);
   } else
-  if(type == 3 && actions[AttackIndex] == 0) {
+  if(type == 3 && mActions[AttackIndex] == 0) {
     dout << "Attacking\n";
     if(AttackPosition > 2.99) AttackPosition = 2.0;
     if(AttackPosition < 0.0) AttackPosition = 0.001;
-    actions[AttackIndex] = new AttackAction(2 * SECOND * character->Slots[IS_RightHand]->GetWeight() / character->GetStr(), character, HitPosition(int(AttackPosition)));
+    mActions[AttackIndex] = new AttackAction(2 * SECOND * mCharacter->Slots[IS_RightHand]->GetWeight() / mCharacter->GetStr(), mCharacter, HitPosition(int(AttackPosition)));
   }
-  DecreaseEP(3);
+  decreaseEP(3);
 
 }

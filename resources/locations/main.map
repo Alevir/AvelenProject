@@ -2,6 +2,7 @@ locX = 11;
 locY = 11;
 startX = 1;
 startY = 1;
+topID = 22L;
 locs = (
   (1, 1, "testLocation.cfg"),
   (2, 1, "loadTest.cfg")

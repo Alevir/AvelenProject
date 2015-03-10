@@ -37,35 +37,42 @@ AControllerBase::AControllerBase(ACharacterBase *iNPC) {
   method = sinp;
 }
 
-void AControllerBase::MoveForward() {
-  dirSum += 1;
+void AControllerBase::Step(double dt) {
+  subStep(dt);
+  if(mIdle) {
+    character->mCurMovState = MoveState::Idle;
+  }
+  mIdle = true;
+}
+
+void AControllerBase::moveForward() {
   double factor = 20;
-  character->ApplyLinearImpulse(AVector2(0, 1).Rotate(character->GetAngle()) *= factor * method(t));
+  mIdle = false;
+  character->mCurMovState = MoveState::MoveForward;
+  character->ApplyLinearImpulse(AVector2(0, 1).Rotate(character->GetAngle()) *= factor/* * method(mT)*/);
 }
 
 
 
-
-void AControllerBase::MoveBack() {
-  dirSum += 1;
+void AControllerBase::moveBack() {
   double factor = 10;
-  character->ApplyLinearImpulse(AVector2(0, -1).Rotate(character->GetAngle()) *= factor * method(t));
+  character->mCurMovState = MoveState::MoveBack;
+  mIdle = false;
+  character->ApplyLinearImpulse(AVector2(0, -1).Rotate(character->GetAngle()) *= factor/* * method(mT)*/);
 }
 
-void AControllerBase::MoveRight() {
-  dirSum += 2;
+void AControllerBase::moveRight() {
   double factor = 10;
-  character->ApplyLinearImpulse(AVector2(-1, 0).Rotate(character->GetAngle()) *= factor * method(t));
+  character->ApplyLinearImpulse(AVector2(-1, 0).Rotate(character->GetAngle()) *= factor/* * method(mT)*/);
 }
 
 void AControllerBase::MoveLeft() {
-  dirSum += 2;
   double factor = 10;
-  character->ApplyLinearImpulse(AVector2(1, 0).Rotate(character->GetAngle()) *= factor * method(t));
+  character->ApplyLinearImpulse(AVector2(1, 0).Rotate(character->GetAngle()) *= factor /** method(mT)*/);
 }
 
 
-void AControllerBase::Turn(char side){
+void AControllerBase::turn(char side){
   if(side) {
     character->ApplyAngularImpulse(0.1);
   } else {
@@ -73,13 +80,7 @@ void AControllerBase::Turn(char side){
   }
 }
 
-void AControllerBase::Turn(int angleMeasure) {
+void AControllerBase::turn(int angleMeasure) {
 character->ApplyAngularImpulse(0.002 * angleMeasure);
-}
-
-void AControllerBase::CheckDirections(double dt) {
-  t += dt;
-  //if( !(dirSum % 2) || dirSum > 3 ) t = 0.0;
-  dirSum = 0;
 }
 

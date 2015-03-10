@@ -115,8 +115,8 @@ void GDropDownMenu::onClick() {
 
 void GRightClickMenu::_activateItem(const sf::String &itemName) {
   if(itemName == "Add Object") {
-    ObjCreation.Show();
-    }
+    ObjCreation.Gui.Show(&ObjCreation);
+  }
 }
 
 bool GRightClickMenu::IsCreationMode() {
@@ -377,7 +377,7 @@ void GRightClickObjectMenu::_activateItem(const sf::String &itemName) {
   } else
   if(itemName == "Edit scripts") {
     ScriptEditor->SetObject(_obj);
-    ScriptEditor->Show();
+    ScriptEditor->Gui.Show(ScriptEditor);
   }
 
 }

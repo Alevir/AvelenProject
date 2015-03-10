@@ -25,6 +25,6 @@
 #include "SFML/ASprite.h"
 
 AGroundCell::AGroundCell(const std::string& iName, ASprite* ipSpr, double iLinDamping)
-    : name(iName), linDamping(iLinDamping) {
-  sprite = ipSpr;
+    : Name(iName), Damping(iLinDamping) {
+  Sprite = ipSpr;
 }

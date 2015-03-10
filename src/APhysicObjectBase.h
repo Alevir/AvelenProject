@@ -23,6 +23,7 @@
 
 #ifndef APHYSICOBJECT_H
 #define APHYSICOBJECT_H
+typedef long long unsigned int UniqueID;
 
 
 //#include "SFML/Graphics.hpp"
@@ -42,16 +43,20 @@ class Effect;
 class EffectData;
 #include "APhysicObjectData.h"
 #include "Box2D/Box2D.h"
+#include <limits>
 
 
 struct ObjectInitArgs {
   bool Coords = false;
   long int ID = -1;
-  long int scrID = -1;
+  UniqueID UnID;
   double x;
   double y;
   double z = 0;
   double angle;
+  ObjectInitArgs() {
+    UnID = std::numeric_limits<UniqueID>::max();
+  }
 };
 
 class APhysicObjectBase : public AObject{
@@ -77,7 +82,7 @@ protected:
   b2Body* body = 0;
   double weight;
   unsigned int ID;
-  unsigned int scrID;
+  UniqueID uniqueID;
   double z;
   double MaxHitPoints;
   double HitPoints;
@@ -134,12 +139,12 @@ public:
   void Step(double dt);
 
   unsigned int GetID() { return ID; }
-  unsigned int GetScriptID() { return scrID; }
+  unsigned int GetScriptID() { return uniqueID; }
   double GetHitPoints() { return HitPoints; }
   double GetMaxHitPoints() { return MaxHitPoints; }
 
   double GetSharpness();
-
+  double GetVelocityModulus();
   double GetProtection();
   double GetX();
   double GetY();

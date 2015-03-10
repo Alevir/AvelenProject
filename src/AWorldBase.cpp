@@ -114,6 +114,7 @@ void AWorldBase::Save(const string& path) {
   findLocation(v.x, v.y);
   cfg.lookup("startX") = int(v.x);
   cfg.lookup("startY") = int(v.y);
+  cfg.lookup("topID") = (long long int)uniqueIDManager.GetTop();
   cfg.writeFile((mapPath + "main.map").c_str());
 
   if(path.back() == '/') {
@@ -156,7 +157,7 @@ void AWorldBase::Reload(const string& savePath) {
     }
   }
   idManager.Clear();
-  scriptIDManager.Clear();
+  uniqueIDManager.Clear();
   Load(savePath);
 }
 
@@ -213,10 +214,10 @@ ALocationBase* AWorldBase::getLocation(int x, int y) {
       libconfig::Config c;
       c.readFile((mapPath + p.Path).c_str());
       ContextLocArgs la;
-      la.sx = (x +  (x > 0 ? -1 : 0)) * locX;
-      la.sy = (y +  (y > 0 ? -1 : 0)) * locY;
-      la.lx = x;
-      la.ly = y;
+      la.Sx = (x +  (x > 0 ? -1 : 0)) * locX;
+      la.Sy = (y +  (y > 0 ? -1 : 0)) * locY;
+      la.Lx = x;
+      la.Ly = y;
       return p.Loc = newLocation(c, la);
     }
   } catch(std::out_of_range& e) {
@@ -317,6 +318,7 @@ void AWorldBase::Load(const string& savePath) {
   int y;
   int ix = root["startX"];
   int iy = root["startY"];
+  uniqueIDManager.SetTop((long long int)root["topID"]);
   Setting& locs = root["locs"];
   for(int i = 0; i < locs.getLength(); ++i) {
     setLocation(locPair(0, (const char*)(locs[i][2])), locs[i][0], locs[i][1]);
@@ -359,6 +361,7 @@ void AWorldBase::findLocation(double& x, double& y) {
   y = floor(y / locY);
   if(y > -1) ++y;
 }
+
 
 AScriptWrapper& AWorldBase::GetScriptWrapper() {
   return *scriptWrapper;

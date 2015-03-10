@@ -25,15 +25,15 @@
 #include "Action.h"
 
 ACombatModelBase::ACombatModelBase(ACharacterBase *iCharacter)
-    : character(iCharacter)  {
+    : mCharacter(iCharacter)  {
 }
 
 
 void ACombatModelBase::Step(double dt)
 {
   subStep(dt);
-  auto it = actions.begin();
-  while(it != actions.end()) {
+  auto it = mActions.begin();
+  while(it != mActions.end()) {
     if(*it == 0) {
       it++;
       continue;
@@ -53,16 +53,16 @@ void ACombatModelBase::Step(double dt)
 }
 
 void ACombatModelBase::Attack(ACharacterBase* target, const AttackData &data) {
-  target->combatModel->RecieveDamage(character->combatModel->DealDamage(data));
+  target->mCombatModel->recieveDamage(mCharacter->mCombatModel->dealDamage(data));
 }
 
-double ACombatModelBase::DecreaseHP(double value) {
-  return character->HP -= value;
+double ACombatModelBase::decreaseHP(double value) {
+  return mCharacter->mHP -= value;
 }
 
-double ACombatModelBase::DecreaseEP(double value) {
-  character->EP -= value;
-  if(character->EP < 0.0) character->EP = 0.0;
-  return character->EP;
+double ACombatModelBase::decreaseEP(double value) {
+  mCharacter->mEP -= value;
+  if(mCharacter->mEP < 0.0) mCharacter->mEP = 0.0;
+  return mCharacter->mEP;
 }
 

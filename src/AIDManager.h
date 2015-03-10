@@ -28,15 +28,15 @@
 #include <stdexcept>
 template<class T>
 class AIDManager {
-  std::set<unsigned int> unused;
-  unsigned int supValue = 0;
+  std::set<unsigned int> mUnused;
+  unsigned int mSupValue = 0;
   std::vector<T*> mContainer;
 
 public:
 
   void Clear() {
-    supValue = 0;
-    unused.clear();
+    mSupValue = 0;
+    mUnused.clear();
     mContainer.clear();
   }
 
@@ -52,8 +52,111 @@ public:
   void ReleaseID(unsigned int id);
 
   unsigned int GetMinNeverUsedID() {
-    return supValue;
+    return mSupValue;
   }
+};
+
+
+
+
+typedef long long unsigned int UniqueID;
+
+class UniqueIDManager {
+
+  struct IDRange {
+    mutable UniqueID Lower;
+    mutable UniqueID Upper;
+
+    bool operator < (const IDRange& str) const {
+      return Lower < str.Lower;
+    }
+
+    IDRange(UniqueID lower, UniqueID upper) : Lower(lower), Upper(upper) {
+    }
+
+    IDRange(UniqueID value) : Lower(value), Upper(value) {
+    }
+  };
+
+  UniqueID mTop = 0;
+  std::set<IDRange> mUsed;
+
+public:
+  void AddValue (UniqueID id) {
+    if(mUsed.empty()) {
+      mUsed.insert(IDRange(id));
+      return;
+    }
+    std::set<IDRange>::iterator it = mUsed.lower_bound(id);
+    if(it == mUsed.end()) {
+      --it;
+      if(id <= it->Upper) {
+        throw std::logic_error("id " + std::to_string(id) + " is already used");
+      }
+      if(id == it->Upper + 1) {
+        ++(it->Upper);
+      } else {
+        mUsed.insert(id);
+      }
+      mTop = id;
+      return;
+    }
+
+    if(it == mUsed.begin()) {
+      if(id == it->Lower) {
+        throw std::logic_error("id " + std::to_string(id) + " is already used");
+      }
+      if(id == it->Lower - 1) {
+        --(it->Lower);
+      } else {
+        mUsed.insert(id);
+      }
+      return;
+    }
+
+    auto prev = it;
+    --prev;
+    if(id == it->Lower || id <= prev->Upper) {
+      throw std::logic_error("id " + std::to_string(id) + " is already used");
+    }
+    if(id == it->Lower - 1) {
+      if(id == prev->Upper + 1) {
+        prev->Upper = it->Upper;
+        mUsed.erase(it);
+      } else {
+        --(it->Lower);
+      }
+    } else
+    if(id == prev->Upper + 1){
+      ++(prev->Upper);
+    } else {
+      mUsed.insert(id);
+    }
+  }
+
+  UniqueID GetNewID() {
+    if(mUsed.empty()) {
+      mUsed.insert(++mTop);
+      return mTop;
+    }
+    if(mTop == (--mUsed.end())->Upper) {
+      return mTop = (++((--mUsed.end())->Upper));
+    }
+    mUsed.insert(++mTop);
+    return mTop;
+  }
+
+  UniqueID GetTop() { return mTop; }
+  void SetTop(UniqueID top) {
+    assert(top >= mTop);
+    mTop = top;
+  }
+
+  void Clear() {
+    mUsed.clear();
+    mTop = 0;
+  }
+
 };
 
 
@@ -101,16 +204,19 @@ public:
 
 };
 
+
+
+
 template<class T>
 unsigned int AIDManager<T>::AddObject(T* obj) {
   unsigned int id;
-  if(!unused.empty()) {
-    id = *unused.begin();
-    unused.erase(unused.begin());
+  if(!mUnused.empty()) {
+    id = *mUnused.begin();
+    mUnused.erase(mUnused.begin());
     mContainer.at(id) = obj;
   } else {
     mContainer.push_back(obj);
-    id = supValue++;
+    id = mSupValue++;
 
   }
   return id;
@@ -120,17 +226,17 @@ unsigned int AIDManager<T>::AddObject(T* obj) {
 template<class T>
 void AIDManager<T>::AddPair(unsigned int id, T* obj) {
   if(mContainer.size() > id) {
-    if(mContainer[id] || (unused.find(id) == unused.end())) throw std::logic_error("id is already used");
+    if(mContainer[id] || (mUnused.find(id) == mUnused.end())) throw std::logic_error("id is already used");
     mContainer[id] = obj;
-    unused.erase(unused.find(id));
+    mUnused.erase(mUnused.find(id));
   } else {
     for(int i = mContainer.size(); i < id; ++i) {
-      unused.insert(i);
+      mUnused.insert(i);
     }
 
     mContainer.resize(id + 1, 0);
     mContainer.back() = obj;
-    supValue = mContainer.size();
+    mSupValue = mContainer.size();
   }
 }
 
@@ -138,12 +244,12 @@ void AIDManager<T>::AddPair(unsigned int id, T* obj) {
 
 template<class T>
 void AIDManager<T>::ReleaseID(unsigned int id) {
-  if(id == supValue-1) {
-    supValue--;
+  if(id == mSupValue-1) {
+    mSupValue--;
     mContainer.pop_back();
     return;
   }
-  unused.insert(id);
+  mUnused.insert(id);
   mContainer.at(id) = 0;
 }
 

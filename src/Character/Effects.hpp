@@ -55,14 +55,14 @@ class DisposableEffect : public DisposableAction, public Effect {
 public:
   double& GetDuration() { return Action::GetDuration(); }
   void Step(double dt);
-  DisposableEffect(double _duration, const std::string& effectName, ACharacterBase* ch);
+  DisposableEffect(double mDuration, const std::string& effectName, ACharacterBase* ch);
 };
 
 class RepeatingEffect : public RepeatingAction, public Effect  {
 public:
   double& GetDuration() { return Action::GetDuration(); }
   void Step(double dt) { RepeatingAction::Step(dt); }
-  RepeatingEffect(double _duration, double period, const std::string& effectName, ACharacterBase* ch);
+  RepeatingEffect(double mDuration, double period, const std::string& effectName, ACharacterBase* ch);
 
 };
 
@@ -73,7 +73,7 @@ class EfRepValueChange : public RepeatingEffect {
 public:
   void Write(libconfig::Setting& group);
   bool Add(const EffectData &ed);
-  EfRepValueChange(double _duration, double period, const std::string& effectName,
+  EfRepValueChange(double mDuration, double period, const std::string& effectName,
               ACharacterBase* ch, double &changedValue, double measure);
   //operator EffectData();
 };

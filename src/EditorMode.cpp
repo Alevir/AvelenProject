@@ -118,7 +118,7 @@ void EditorMode::_run() {
         } else
         if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::L)
               && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) {
-          locCr.Show();
+          control.Show(&locCr);
           dout << "loc cr";
         } else
         if ((event.type == sf::Event::KeyPressed) && (event.key.code == sf::Keyboard::T)

@@ -67,28 +67,23 @@ protected:
 
 
   double totalWeight = 0.0;
-
+  void Show() {
+    mWindow->show();
+    //assert(0);
+  }
+  void Hide();
 
 public:
   void SwitchVisibility();
 
-  void Hide() {
-    Gui.OnHideOrClose(this);
-    mWindow->hide();
-  }
 
-  void Show() {
-    mWindow->show();
-  }
 
   APhysicObjectBase* GetObject() { return _obj; }
   GContainer(APhysicObjectBase* obj, GGUI& iGui, GContainerSystem *iCs);
   void Refresh();
   void SetPosition(double x, double y);
 
-  virtual ~GContainer() {
-    mWindow->destroy();
-  }
+  virtual ~GContainer();
 
   //exceptions
 

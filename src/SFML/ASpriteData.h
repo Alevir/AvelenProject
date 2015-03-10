@@ -37,7 +37,7 @@ struct ASpriteData : public AData {
   double xSprSize = 1.0;
   double ySprSize = 1.0;
 
-  void print(std::ostream& stream) const;
+  void Print(std::ostream& stream) const;
 };
 
 #endif // ASPRITEDATA_H

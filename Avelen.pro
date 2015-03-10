@@ -71,7 +71,8 @@ SOURCES += \
     src/AObjectFilter.cpp \
     src/AScriptArea.cpp \
     src/GUI/GScriptEditor.cpp \
-    src/AControllers/ASimpleAIController.cpp
+    src/AControllers/ASimpleAIController.cpp \
+    src/AGarbageCollector.cpp
 
 OTHER_FILES += \
     resources/characters.xml \
@@ -144,5 +145,6 @@ HEADERS += \
     src/AScriptArea.hpp \
     src/AObjectFilter.hpp \
     src/GUI/GScriptEditor.hpp \
-    src/AControllers/ASimpleAIController.hpp
+    src/AControllers/ASimpleAIController.hpp \
+    src/AGarbageCollector.hpp
 

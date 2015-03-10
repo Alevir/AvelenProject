@@ -24,8 +24,16 @@
 
 
 void AAnimationScheme::SetState(const std::string& state) {
+
+  auto res = anims.find(state);
+  //if(res == anims.end()) throw std::logic_error("there is no " + state + "state");
+  if(res == anims.end()) {
+    cur = &anims["Idle"];
+    curAnimName = "Idle";
+    return;
+  }
+  cur = &(res->second);
   curAnimName = state;
-  cur = &anims[state];
   cur->Reset();
 }
 

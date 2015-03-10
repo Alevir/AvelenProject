@@ -52,7 +52,7 @@ protected:
   virtual void _run() = 0;
 
 public:
-  GMessageManager MessageManager;
+  //GMessageManager MessageManager;
   Mode();
   void Run();
   virtual ~Mode();

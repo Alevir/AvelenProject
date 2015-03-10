@@ -29,6 +29,7 @@ class AAnimationScheme {
   std::string curAnimName;
 public:
   void SetState(const std::string& state);
+  AAnimation* GetCurentAnim() { return cur; }
   AAnimationScheme(const libconfig::Setting& s);
   AAnimationScheme(const AAnimationScheme& as);
   ASprite* Step(double dt);

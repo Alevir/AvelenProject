@@ -24,12 +24,12 @@
 #include "ADebugOutput.h"
 #include "GUI/GCommon.h"
 
-ADebugOutput::ADebugOutput(GGUI& gui) : tbox(gui.Gui) {
-  tbox->hide();
-  tbox->setPosition(20, 20);
-  tbox->setSize(400, 300);
-  tbox->setTextColor(sf::Color(250, 250, 250));
-  tbox->setScrollbar("../resources//tgui/Black.conf");
+ADebugOutput::ADebugOutput(GGUI& gui) : mTBox(gui.Gui) {
+  mTBox->hide();
+  mTBox->setPosition(20, 20);
+  mTBox->setSize(400, 300);
+  mTBox->setTextColor(sf::Color(250, 250, 250));
+  mTBox->setScrollbar("../resources//tgui/Black.conf");
 }
 
 ADebugInfoStackPointer dout;

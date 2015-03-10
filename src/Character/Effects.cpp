@@ -47,12 +47,12 @@ EfRepValueChange::EfRepValueChange(double duration, double period, const std::st
 
 bool EfRepValueChange::Add(const EffectData &ed) {
   if(EffectName != ed.Name) return false;
-  int acts = _duration / Period;
+  int acts = mDuration / Period;
   double totalVal = ed.Duration / ed.Period * ed.Measure;
   _measure += totalVal / 2.0 / (double)acts;
 
   dout << _measure;
-  _duration += totalVal / 2 / _measure * Period;
+  mDuration += totalVal / 2 / _measure * Period;
   return true;
 }
 
@@ -64,7 +64,7 @@ void EfRepValueChange::Activate() {
 void EfRepValueChange::Write(libconfig::Setting &group) {
   using namespace libconfig;
   group.add("name", Setting::TypeString) = EffectName;
-  group.add("dur", Setting::TypeFloat) = _duration;
+  group.add("dur", Setting::TypeFloat) = mDuration;
   group.add("per", Setting::TypeFloat) = Period;
   group.add("measure", Setting::TypeFloat) = _measure;
 }
@@ -73,10 +73,10 @@ void EfRepValueChange::Write(libconfig::Setting &group) {
 
 Effect* Effect::CreateEffect(const EffectData& ed, ACharacterBase* ch) {
   if(ed.Name == "PeriodicHPRestore") {
-    return new EfRepValueChange(ed.Duration, ed.Period, ed.Name, ch, ch->HP, ed.Measure);
+    return new EfRepValueChange(ed.Duration, ed.Period, ed.Name, ch, ch->mHP, ed.Measure);
   } else
   if(ed.Name == "PeriodicEPRestore") {
-    return new EfRepValueChange(ed.Duration, ed.Period, ed.Name, ch, ch->EP, ed.Measure);
+    return new EfRepValueChange(ed.Duration, ed.Period, ed.Name, ch, ch->mEP, ed.Measure);
   } else
     throw std::logic_error("unknown effect");
 }

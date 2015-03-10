@@ -33,31 +33,32 @@ enum class Controllers : unsigned int {
 class AControllerBase {
 
 
+  bool mIdle = true;
   double (*method)(double);
-  int dirSum;
-  int dirCount;
-  double t = 0.0;
+  int mDirSum;
+  int mDirCount;
+  double mT = 0.0;
 protected:
 
   const char RIGHT = 0;
   const char LEFT = 1;
   ACharacterBase* character;
-  void MoveForward();
-  void MoveBack();
-  void MoveRight();
+  void moveForward();
+  void moveBack();
+  void moveRight();
   void MoveLeft();
-  void Turn(char side);
-  void Turn(int angleMeasure);
-  void JumpForward();
-  void Attack(int attackType);
-  void CheckDirections(double dt);
+  void turn(char side);
+  void turn(int angleMeasure);
+  void jumpForward();
+  void attack(int attackType);
+  virtual void subStep(double dt) = 0;
 public:
   virtual bool IsEnabled() { return true; }
   virtual void SetEnabled(bool v) {}
   virtual bool Switch() { return true; }
   virtual unsigned int GetType() const = 0;
   AControllerBase(ACharacterBase* iNPC);
-  virtual void Step(double dt) = 0;
+  virtual void Step(double dt) final;
   virtual ~AControllerBase() {}
 
 

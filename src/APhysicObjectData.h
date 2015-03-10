@@ -122,7 +122,7 @@ struct APhysicObjectData : public AData {
   double InitMaxHitPoints = 1;
   double Protection;
   ALogicMaterial Material;
-  void print(std::ostream& stream) const;
+  void Print(std::ostream& stream) const;
   std::string sprite;
   std::string animation;
   std::string scheme;

@@ -223,12 +223,22 @@ APhysicObjectBase* GInventory::GetSourceObject() {
 
 
 void GPlayerInventory::_onClose() {
+  Hide();
+  //mWindow->destroy();
+}
+
+void GPlayerInventory::Hide() {
   Gui.OnHideOrClose(this);
+  mWindow->hide();
   csystem->CloseAll();
 }
 
 GPlayerInventory::GPlayerInventory(ACharacterBase *ch, GGUI& iGui, GContainerSystem *iCs)
 : GInventory(ch, iGui, iCs) {
 
-  //panel->bindCallback(&GPlayerInventory::onClose, this, tgui::ChildWindow::Closed);
+//panel->bindCallback(&GPlayerInventory::onClose, this, tgui::ChildWindow::Closed);
+}
+
+GPlayerInventory::~GPlayerInventory() {
+  mWindow->destroy();
 }

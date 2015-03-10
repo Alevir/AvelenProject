@@ -1,5 +1,6 @@
 /*
     This file is part of Avelen Project.
+    Copyright (c) 2014  Evdokimov Mikhail
 
     Avelen Project is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,27 +15,18 @@
     You should have received a copy of the GNU General Public License
     along with Avelen Project.  If not, see <http://www.gnu.org/licenses/>.
 
-    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    Authors of file: Mikhail Evdokimov
-
-    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 */
+#include "AGarbageCollector.hpp"
 
-#ifndef AGROUNDCELL_H
-#define AGROUNDCELL_H
+AGarbageCollector trash;
 
-#include <string>
-class ALocationBase;
-class ASprite;
+void AGarbageCollector::AddObject(RemovableObject* obj) {
+  mCont.push_back(obj);
+}
 
-class AGroundCell {
-public:
-  AGroundCell(const std::string& iName, ASprite* ipSpr, double iLinDamping);
-  const std::string Name;
-  ASprite* Sprite;
-  const double Damping;
-};
-
-
-#endif // AGROUNDCELL_H
+void AGarbageCollector::Clean() {
+  for(RemovableObject* r : mCont) {
+    delete r;
+  }
+  mCont.clear();
+}

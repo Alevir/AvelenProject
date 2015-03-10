@@ -52,11 +52,11 @@ APhysicObjectBase::APhysicObjectBase(const APhysicObjectData *data, ALocationBas
   }
 
 
-  if(args.scrID < 0) {
-    scrID = world->scriptIDManager.GetNewID();
+  if(args.UnID == std::numeric_limits<UniqueID>::max()) {
+    uniqueID = world->uniqueIDManager.GetNewID();
   } else {
-    scrID = args.scrID;
-    world->scriptIDManager.AddLoadedID(scrID);
+    uniqueID = args.UnID;
+    world->uniqueIDManager.AddValue(uniqueID);
   }
 
   weight = templateData.InitWeight;
@@ -114,9 +114,15 @@ double APhysicObjectBase::GetSharpness() {
   return Sharpness;
 }
 
+double APhysicObjectBase::GetVelocityModulus() {
+  if(body) {
+    return body->GetLinearVelocity().Length();
+  } else return -1.0;
+}
+
 double APhysicObjectBase::GetProtection() {
-assert(templateData.objectType == APhysicObjectData::OT_Armor);
-return Protection;
+  assert(templateData.objectType == APhysicObjectData::OT_Armor);
+  return Protection;
 }
 
 

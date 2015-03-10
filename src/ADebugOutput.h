@@ -31,20 +31,20 @@ class GGUI;
 
 #include "TGUI/TGUI.hpp"
 class ADebugOutput : public std::wostream {
-  std::wstringstream _sstr;
-  tgui::TextBox::Ptr tbox;
+  std::wstringstream mSstr;
+  tgui::TextBox::Ptr mTBox;
 public:
   ADebugOutput(GGUI& gui);
   void Switch() {
-    bool v = !tbox->isVisible();
-    v ? tbox->show() : tbox->hide();
+    bool v = !mTBox->isVisible();
+    v ? mTBox->show() : mTBox->hide();
   }
 
   template <class T>
   ADebugOutput& operator << (const T& info) {
-    _sstr << info;
+    mSstr << info;
 
-    tbox->setText(_sstr.rdbuf()->str());
+    mTBox->setText(mSstr.rdbuf()->str());
     return *this;
   }
 
@@ -62,22 +62,22 @@ public:
 template <class T>
 class AStackPointer {
 protected:
-  std::stack<T*> _stack;
+  std::stack<T*> mStack;
 public:
   AStackPointer() {}
   void Pop() {
-    _stack.pop();
+    mStack.pop();
   }
 
   void Push(T* value) {
-    _stack.push(value);
+    mStack.push(value);
   }
 
   T& operator*() {
-    return *(_stack.top());
+    return *(mStack.top());
   }
   T* operator -> () {
-    return _stack.top();
+    return mStack.top();
   }
 };
 
@@ -86,7 +86,7 @@ class ADebugInfoStackPointer
 public:
   template <class T>
   std::wostream& operator << (const T& info) {
-    if(_stack.empty()) {
+    if(mStack.empty()) {
       std::wcout << info;
       return std::wcout;
     }

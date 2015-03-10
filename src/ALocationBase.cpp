@@ -49,24 +49,24 @@ std::map<std::string, AGroundCell*> ALocationBase::scriptGroundContainer;
 void ALocationBase::Step(double dt) {
   ALocationBase* loc;
 
-  auto cit = localCharacters.begin();
+  auto cit = mLocalCharacters.begin();
   decltype(cit) ceit;
-  while(cit != localCharacters.end()) {
+  while(cit != mLocalCharacters.end()) {
     ACharacterBase* obj = *cit;
-    if(obj->HP <= 0.0) {
+    if(obj->mHP <= 0.0) {
       world->RemoveObject(obj);
       obj->Destroy();
       ceit = cit;
       cit++;
-      localCharacters.erase(ceit);
+      mLocalCharacters.erase(ceit);
       delete obj;
       continue;
     }
 
     double x = obj->GetX();
     double y = obj->GetY();
-    if(x > msx && y > msy && x < (XLen * cellSize + msx) && y < (YLen * cellSize + msy)) {
-      obj->SetDamping(ground[int(x / cellSize) % XLen][int(y / cellSize)  % YLen]->linDamping);
+    if(x > msx && y > msy && x < (mXLen * cellSize + msx) && y < (mYLen * cellSize + msy)) {
+      obj->SetDamping(mGround[int(x / cellSize) % mXLen][int(y / cellSize)  % mYLen]->Damping);
     }
     obj->Step(dt);
 
@@ -83,19 +83,19 @@ void ALocationBase::Step(double dt) {
         world->currentLoc = loc;
       }
       transferCharacter(cit, loc);
-      if(cit == localCharacters.end()) break;
+      if(cit == mLocalCharacters.end()) break;
       ++cit;
       continue;
     } else {
       AVector2 p(obj->GetPosition());
       if(xx > mlx) {
-        p.x = msx + XLen * cellSize;
+        p.x = msx + mXLen * cellSize;
       } else
       if(xx < mlx){
         p.x = msx;
       }
       if(yy > mly) {
-        p.y = msy + YLen * cellSize;
+        p.y = msy + mYLen * cellSize;
       } else
       if(yy < mly) {
         p.y = msy;
@@ -106,9 +106,9 @@ void ALocationBase::Step(double dt) {
   }
 
 
-  auto oit = localObjects.begin();
+  auto oit = mLocalObjects.begin();
   decltype(oit) oeit;
-  while(oit != localObjects.end()) {
+  while(oit != mLocalObjects.end()) {
     APhysicObjectBase* obj = *oit;
     if(obj->containingObject) {
      ++oit;
@@ -117,8 +117,8 @@ void ALocationBase::Step(double dt) {
 
     double x = obj->GetX();
     double y = obj->GetY();
-    if(x > msx && y > msy && x < (XLen * cellSize + msx) && y < (YLen * cellSize + msy)) {
-      obj->SetDamping(ground[int(x / cellSize) % XLen][int(y / cellSize)  % YLen]->linDamping);
+    if(x > msx && y > msy && x < (mXLen * cellSize + msx) && y < (mYLen * cellSize + msy)) {
+      obj->SetDamping(mGround[int(x / cellSize) % mXLen][int(y / cellSize)  % mYLen]->Damping);
     }
     obj->Step(dt);
 
@@ -131,19 +131,19 @@ void ALocationBase::Step(double dt) {
 
     if(loc) {
       transferObj(oit, loc);
-      if(oit == localObjects.end()) break;
+      if(oit == mLocalObjects.end()) break;
       ++oit;
       continue;
     } else {
       AVector2 p(obj->GetPosition());
      if(xx > mlx) {
-        p.x = msx + XLen * cellSize;
+        p.x = msx + mXLen * cellSize;
       } else
       if(xx < mlx){
         p.x = msx;
       }
       if(yy > mly) {
-        p.y = msy + YLen * cellSize;
+        p.y = msy + mYLen * cellSize;
       } else
       if(yy < mly) {
         p.y = msy;
@@ -153,11 +153,11 @@ void ALocationBase::Step(double dt) {
     ++oit;
 
   }
-  scrCont.Step(dt);
+  mScrCont.Step(dt);
 }
 
 
-ALocationBase::ALocationBase(AWorldBase *iWorld) : scrCont(iWorld, iWorld->scriptWrapper) {
+ALocationBase::ALocationBase(AWorldBase *iWorld) : mScrCont(iWorld, iWorld->scriptWrapper) {
   world = iWorld;
 }
 
@@ -166,23 +166,23 @@ ALocationBase::ALocationBase(AWorldBase *iWorld) : scrCont(iWorld, iWorld->scrip
 
 
 const AGroundCell* ALocationBase::GetCell(int x, int y) {
-  return ground[x][y];
+  return mGround[x][y];
 }
 
 
 ALocationBase::~ALocationBase() {
-  for(APhysicObjectBase* obj : localObjects) {
+  for(APhysicObjectBase* obj : mLocalObjects) {
     world->RemoveObject(obj);
     delete obj;
   }
-  for(ACharacterBase* obj : localCharacters) {
+  for(ACharacterBase* obj : mLocalCharacters) {
     world->RemoveObject(obj);
     delete obj;
   }
-  for(int i = 0; i < XLen; i++) {
-    delete[] ground[i];
+  for(int i = 0; i < mXLen; i++) {
+    delete[] mGround[i];
   }
-  delete[] ground;
+  delete[] mGround;
 }
 
 
@@ -191,7 +191,7 @@ APhysicObjectBase* ALocationBase::AddObject(std::string iTemplateName, ObjectIni
   APhysicObjectBase* obj;
   args.Coords = true;
   obj = world->CreateObject(iTemplateName, this, args);
-  localObjects.insert(obj);
+  mLocalObjects.insert(obj);
   return obj;
 }
 
@@ -200,7 +200,7 @@ APhysicObjectBase* ALocationBase::AddObject(std::string iTemplateName, APhysicOb
   args.Coords = false;
   obj = world->CreateObject(iTemplateName, this, args);
   container->AddObjectToContainer(obj);
-  localObjects.insert(obj);
+  mLocalObjects.insert(obj);
   return obj;
 }
 
@@ -209,7 +209,7 @@ APhysicObjectBase* ALocationBase::AddObject(std::string iTemplateName, ACharacte
   args.Coords = false;
   obj = world->CreateObject(iTemplateName, this, args);
   character->DirectEquip(obj, slot);
-  localObjects.insert(obj);
+  mLocalObjects.insert(obj);
   return obj;
 }
 
@@ -217,42 +217,42 @@ ACharacterBase* ALocationBase::AddCharacter(const ACharacterData* chd, ObjectIni
   ACharacterBase* ch;
   args.Coords = true;
   ch = world->CreateCharacter(chd, this, args);
-  localCharacters.insert(ch);
+  mLocalCharacters.insert(ch);
   return ch;
 }
 
 
 
 void ALocationBase::loadLocationFromCfg(libconfig::Config& loc, const ContextLocArgs& la) {
-  msx = la.sx;
-  msy = la.sy;
-  mlx = la.lx;
-  mly = la.ly;
+  msx = la.Sx;
+  msy = la.Sy;
+  mlx = la.Lx;
+  mly = la.Ly;
   if(!(
-    loc.lookupValue("XLen", XLen) &&
-    loc.lookupValue("YLen", YLen)
+    loc.lookupValue("XLen", mXLen) &&
+    loc.lookupValue("YLen", mYLen)
   )) throw std::logic_error("map size wasn't defined");
-  ground = new AGroundCell**[XLen];
-  for( int i = 0; i <XLen; i++) {
-    ground[i] = new AGroundCell*[YLen];
+  mGround = new AGroundCell**[mXLen];
+  for( int i = 0; i <mXLen; i++) {
+    mGround[i] = new AGroundCell*[mYLen];
   }
 
 
   Setting& nameMap = loc.lookup("nameMap");
   for(int i = 0; i < nameMap.getLength(); i++) {
     AGroundCell* c = scriptGroundContainer[nameMap[i]["name"]];
-    _loadingArray.push_back(c);
-    _savingMap.insert(pair<AGroundCell*, unsigned int>(c, i));
-    _nameMap.push_back(nameMap[i]["name"]);
+    mLoadingArray.push_back(c);
+    mSavingMap.insert(pair<AGroundCell*, unsigned int>(c, i));
+    mNameMap.push_back(nameMap[i]["name"]);
   }
   std::string map = loc.lookup("map");
   std::stringstream sstr;
   sstr << map;
   int g;
-  for(int y = 0; y < YLen; y++) {
-    for(int x = 0; x < XLen; x++) {
+  for(int y = 0; y < mYLen; y++) {
+    for(int x = 0; x < mXLen; x++) {
       sstr >> g;
-      ground[x][y] =  _loadingArray[g];
+      mGround[x][y] =  mLoadingArray[g];
     }
   }
 
@@ -265,7 +265,7 @@ void ALocationBase::loadLocationFromCfg(libconfig::Config& loc, const ContextLoc
     ia.angle = s["angle"];
     ia.z = s["z"];
     ia.ID = (int)s["id"];
-    ia.scrID = (int)s["scrID"];
+    ia.UnID = (int)s["scrID"];
     APhysicObjectBase* obj = AddObject((const char*)s["templateName"], ia);
     _readObject(s, obj);
     _readContainer(s["container"], obj);
@@ -287,12 +287,12 @@ void ALocationBase::loadLocationFromCfg(libconfig::Config& loc, const ContextLoc
     ia.angle = c["angle"];
     ia.z = c["z"];
     ia.ID = (int)c["id"];
-    ia.scrID = (int)c["scrID"];
+    ia.UnID = (int)c["scrID"];
 
     ACharacterBase* ch = AddCharacter(&chd, ia);
     _readObject(c, ch);
-    c.lookupValue("HP", ch->HP);
-    c.lookupValue("EP", ch->EP);
+    c.lookupValue("HP", ch->mHP);
+    c.lookupValue("EP", ch->mEP);
     //load properties
     //..
     Setting& effs = c["effects"];
@@ -322,7 +322,7 @@ void ALocationBase::loadLocationFromCfg(libconfig::Config& loc, const ContextLoc
       string name;
       if(sc.lookupValue("templateName", name)) {
         ia.ID = (int)sc["id"];
-        ia.scrID = (int)sc["scrID"];
+        ia.UnID = (int)sc["scrID"];
         ch->Slots[i] = AddObject(name, ch, InventorySlot(i), ia);
         _readObject(sc, ch->Slots[i]);
         _readContainer(sc["container"], ch->Slots[i]);
@@ -341,15 +341,15 @@ void ALocationBase::loadLocationFromCfg(libconfig::Config& loc, const ContextLoc
     if(a.exists("filter")) {
       f = AObjectFilter::CreateFilter(a["filter"]);
     }
-    scrCont.AddScriptArea(FromCfgFormat((const char*)a["script"]), b, f);
+    mScrCont.AddScriptArea(FromCfgFormat((const char*)a["script"]), b, f);
     }
 }
 
 ALocationBase* ALocationBase::boundsTest(APhysicObjectBase* obj, int& x, int& y) {
 
-  x = floor(obj->GetX() / XLen);
+  x = floor(obj->GetX() / mXLen);
   if(x > -1) ++x;
-  y = floor(obj->GetY() / YLen);
+  y = floor(obj->GetY() / mYLen);
   if(y > -1) ++y;
 
   return world->getLocation(x, y);
@@ -357,24 +357,24 @@ ALocationBase* ALocationBase::boundsTest(APhysicObjectBase* obj, int& x, int& y)
 
 void ALocationBase::transferObj(APhysicObjectBase* obj, set<APhysicObjectBase*>::iterator& validIt, ALocationBase* dest) {
   assert(obj);
-  auto it = localObjects.find(obj);
-  if(it == localObjects.end()) throw std::logic_error("no object");
-  dest->localObjects.insert(obj);
+  auto it = mLocalObjects.find(obj);
+  if(it == mLocalObjects.end()) throw std::logic_error("no object");
+  dest->mLocalObjects.insert(obj);
   obj->mLoc = dest;
   for(APhysicObjectBase* p : obj->container) {
     transferObj(p, validIt, dest);
   }
   if(validIt == it) --validIt;
-  localObjects.erase(it);
+  mLocalObjects.erase(it);
 }
 
 void ALocationBase::transferObj(set<APhysicObjectBase*>::iterator& it, ALocationBase* dest) {
   APhysicObjectBase* obj = *it;
   set<APhysicObjectBase*>::iterator eit;
 
-  if(it == localObjects.begin()) {
+  if(it == mLocalObjects.begin()) {
     transferObj(obj, it, dest);
-    it = localObjects.begin();
+    it = mLocalObjects.begin();
   } else {
     transferObj(obj, it, dest);
   }
@@ -387,19 +387,19 @@ void ALocationBase::transferCharacter(std::set<ACharacterBase*>::iterator& it, A
 
   for(int i = 0; i < InventorySize; ++i) {
     if(obj->Slots[i]) {
-      oit = localObjects.find(obj->Slots[i]);
+      oit = mLocalObjects.find(obj->Slots[i]);
       transferObj(obj->Slots[i], oit, dest);
     }
   };
-  dest->localCharacters.insert(obj);
+  dest->mLocalCharacters.insert(obj);
   obj->mLoc = dest;
   for(APhysicObjectBase* p : obj->container) {
-    oit = localObjects.find(p);
+    oit = mLocalObjects.find(p);
     transferObj(p, oit, dest);
   }
   auto eit = it;
   it++;
-  localCharacters.erase(eit);
+  mLocalCharacters.erase(eit);
 }
 
 
@@ -465,7 +465,7 @@ void ALocationBase::_readContainer(libconfig::Setting& cont, APhysicObjectBase* 
     Setting& s = cont[i];
     ObjectInitArgs ia;
     ia.ID = (int)s["id"];
-    ia.scrID = (int)s["scrID"];
+    ia.UnID = (int)s["scrID"];
     APhysicObjectBase* n = AddObject(s["templateName"], obj, ia);
     _readObject(s, n);
     _readContainer(s["container"], n);
@@ -488,27 +488,27 @@ void ALocationBase::Save(const std::string& iFileName) {
 try {
   libconfig::Config loc;
   libconfig::Setting& s = loc.getRoot();
-  s.add("XLen", libconfig::Setting::TypeInt) = XLen;
-  s.add("YLen", libconfig::Setting::TypeInt) = YLen;
+  s.add("XLen", libconfig::Setting::TypeInt) = mXLen;
+  s.add("YLen", libconfig::Setting::TypeInt) = mYLen;
   Setting& nlist = s.add("nameMap", Setting::TypeList);
-  for(int i = 0; i < _nameMap.size(); i++) {
+  for(int i = 0; i < mNameMap.size(); i++) {
     Setting& point = nlist.add(Setting::TypeGroup);
-    point.add("name", Setting::TypeString) = _nameMap[i];
+    point.add("name", Setting::TypeString) = mNameMap[i];
     point.add("id", Setting::TypeInt) = i;
   }
 
   stringstream sstr;
   string map;
-  for(int y = 0; y < YLen; y++) {
-    for(int x = 0; x < XLen; x++) {
-      sstr << ' ' << _savingMap[ground[x][y]];
+  for(int y = 0; y < mYLen; y++) {
+    for(int x = 0; x < mXLen; x++) {
+      sstr << ' ' << mSavingMap[mGround[x][y]];
     }
   }
   map = sstr.rdbuf()->str();
   s.add("map", libconfig::Setting::TypeString) = map;
   Setting& objList = s.add("objects", libconfig::Setting::TypeList);
 
-  for(APhysicObjectBase* obj : localObjects) {
+  for(APhysicObjectBase* obj : mLocalObjects) {
     if(!obj->containingObject) {
       Setting& group = objList.add(Setting::TypeGroup);
       _writeObject(group, obj);
@@ -517,7 +517,7 @@ try {
   }
 
   Setting& chList = s.add("characters", libconfig::Setting::TypeList);
-  for(ACharacterBase* obj : localCharacters) {
+  for(ACharacterBase* obj : mLocalCharacters) {
     Setting& group = chList.add(Setting::TypeGroup);
     group.add("controller", Setting::TypeInt) = (int)(obj->GetController() ? obj->GetController()->GetType() : 0 );
     group.add("combatModel", Setting::TypeInt) = (int)(obj->GetCombatModel()->GetType());
@@ -540,11 +540,11 @@ try {
       }
     }
     Setting& effs = group.add("effects", Setting::TypeList);
-    for(const std::pair<std::string, Effect*>& p : obj->effects) {
+    for(const std::pair<std::string, Effect*>& p : obj->mEffects) {
       p.second->Write(effs.add(Setting::TypeGroup));
     }
   }
-  scrCont.Save(s);
+  mScrCont.Save(s);
 
 
   loc.writeFile((iFileName).c_str());
@@ -562,9 +562,9 @@ void ALocationBase::RemoveAObject(APhysicObjectBase* obj) {
   world->RemoveObject(obj);
   ACharacterBase* ch = dynamic_cast<ACharacterBase*>(obj);
   if(ch) {
-    localCharacters.erase(localCharacters.find(ch));
+    mLocalCharacters.erase(mLocalCharacters.find(ch));
   } else {
-    localObjects.erase(localObjects.find(obj));
+    mLocalObjects.erase(mLocalObjects.find(obj));
   }
   std::cerr << obj->GetID() << "  " << obj->GetTemplateName() << "\n";
   obj->Destroy();

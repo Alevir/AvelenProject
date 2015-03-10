@@ -38,6 +38,7 @@ class AKeyboardControllerSFML;
 class Effect;
 class EffectData;*/
 #include <map>
+typedef unsigned int uint;
 
 
 
@@ -72,6 +73,17 @@ struct AttackData {
   HitPosition Pos;
 };
 
+enum class MoveState : size_t {
+  Idle,
+  MoveForward,
+  MoveBack,
+  MoveRight,
+  MoveLeft,
+  Attack
+};
+
+extern std::string MoveStateNames[];
+
 class AControllerBase;
 
 class ACharacterBase
@@ -86,27 +98,27 @@ class ACharacterBase
   friend class ALocationBase;
   friend Effect* Effect::CreateEffect(const EffectData &ed, ACharacterBase *ch);
 
-  ACombatModelBase* combatModel = 0;
-  AControllerBase* controller = 0;
-  APhysicObjectBase* weapon;
-  std::set<Action*> actions;
-  std::map<std::string, Effect*> effects;
+  ACombatModelBase* mCombatModel = 0;
+  AControllerBase* mController = 0;
+  APhysicObjectBase* mWeapon;
+  std::set<Action*> mActions;
+  std::map<std::string, Effect*> mEffects;
   APhysicObjectBase* DropObjectAfterDeath(APhysicObjectBase* obj, double distX, double distY);
 
-  MovementAction* feetAction;
-  double str;
-  double acc;
-  double reg;
-  double XP;
-  const CharacterRace* race;
+  double mStr;
+  double mAcc;
+  double mReg;
+  double mXP;
+  const CharacterRace* mRace;
 protected:
   virtual void Destroy();
   virtual ~ACharacterBase();
-  double HP = 100.0;
-  double maxHP = 100.0;
-  double EP = 100.0;
-  double maxEP = 100.0;
-
+  double mHP = 100.0;
+  double mMaxHP = 100.0;
+  double mEP = 100.0;
+  double mMaxEP = 100.0;
+  MoveState mCurMovState = MoveState::Idle;
+  MoveState mPrevMovState = MoveState::Idle;
 
 public:
   const std::map<std::string, Effect*>& GetEffects();
@@ -139,12 +151,12 @@ public:
   APhysicObjectBase* GetObjectFromInventory(InventorySlot sl);       // removes object from inventory
   void FreeTheSlot(InventorySlot sl);   //  put object to bag or drop, if there is no bag
   void DropSlot(InventorySlot sl, double dx = 0.0, double dy = 0.0);
-  static inline bool CheckSlotCompat(APhysicObjectBase* obj, InventorySlot sl);
+  static bool CheckSlotCompat(APhysicObjectBase* obj, InventorySlot sl);
 
 
   void Print();
-  const AControllerBase* GetController() const { return controller; }
-  const ACombatModelBase* GetCombatModel() const { return combatModel; }
+  const AControllerBase* GetController() const { return mController; }
+  const ACombatModelBase* GetCombatModel() const { return mCombatModel; }
   bool SwitchController();
   bool AddObjectToBag(APhysicObjectBase* obj);
   void GetObjectFromBag(APhysicObjectBase* obj);
@@ -152,15 +164,15 @@ public:
   void AddEffect(const EffectData &ed);
   bool DrinkPotion(APhysicObjectBase* potion);
 
-  double GetStr() { return str; }
-  double GetAcc() { return acc; }
-  double GetReg() { return reg; }
-  double GetXP() { return XP; }
-  double GetMaxHP() { return maxHP; }
-  double GetMaxEP() { return maxEP; }
-  double GetHP() { return HP; }
-  double GetEP() { return EP; }
-  std::string GetRace() { return race->name; }
+  double GetStr() { return mStr; }
+  double GetAcc() { return mAcc; }
+  double GetReg() { return mReg; }
+  double GetXP() { return mXP; }
+  double GetMaxHP() { return mMaxHP; }
+  double GetMaxEP() { return mMaxEP; }
+  double GetHP() { return mHP; }
+  double GetEP() { return mEP; }
+  std::string GetRace() { return mRace->name; }
 
   //inventory exceptions
   class ExObjectDropped { };

@@ -27,10 +27,11 @@
 #include "GInventory.h"
 #include "Global.h"
 
+/*
 void GContainerSystem::_deleteContainer(APhysicObjectBase *objKey) {
   auto it = conts.find(objKey);
   if(it != conts.end()) {
-    delete it->second;
+    _forRemoval.push_back(it->second);
     conts.erase(it);
   }
 }
@@ -38,12 +39,19 @@ void GContainerSystem::_deleteContainer(APhysicObjectBase *objKey) {
 void GContainerSystem::_deleteInventory(ACharacterBase *chKey) {
   auto it = invs.find(chKey);
   if(it != invs.end()) {
-    delete it->second;
+    _forRemoval.push_back(it->second);
     invs.erase(it);
   }
-}
+}*/
 
 InventorySlot GContainerSystem::getSourceSlot() { return invSource->sourceButton->_slot; }
+
+void GContainerSystem::ClearStep() {
+  for(GContainer* c : mForRemoval) {
+    delete c;
+  }
+  mForRemoval.clear();
+}
 
 void GContainerSystem::CheckAndDrop() {
 if(!_used) {
@@ -77,6 +85,8 @@ void GEditorContainerSystem::_checkAndDrop() {
 }
 
 void GInGameContainerSystem::_checkAndDrop() {
+  if(!mPLI) return;
+  ACharacterBase* mPlayer = mPLI->GetCharacter();
   if(sourceStatus == ContainerSource) {
     if(contSource->_obj->GetPosition().GetDistance(mPlayer->GetPosition()) >= TransferDistance) {
       throw ExLongDistance();
@@ -101,18 +111,23 @@ void GInGameContainerSystem::_checkAndDrop() {
     }
 }
 
-void GInGameContainerSystem::CloseAll() {
-  GContainerSystem::CloseAll();
-  mPLI->Hide();
+void GInGameContainerSystem::removePlayerInventory() {
+  mForRemoval.push_back(mPLI);
+  mPLI = 0;
 }
 
-GInGameContainerSystem::GInGameContainerSystem(GGUI& iGui, ACharacterBase* player)
-  : GContainerSystem(iGui), mPlayer(player) {
-  mPLI = new GPlayerInventory(mPlayer, iGui, this);
+GInGameContainerSystem::GInGameContainerSystem(GGUI& iGui)
+  : GContainerSystem(iGui) {
+}
+
+void GInGameContainerSystem::AddPlayerInventory(ACharacterBase* player) {
+  mPLI = new GPlayerInventory(player, gui, this);
 }
 
 GInGameContainerSystem::~GInGameContainerSystem() {
-delete mPLI;
+  if(mPLI) {
+    delete mPLI;
+  }
 }
 
 
@@ -120,12 +135,13 @@ GContainerSystem::GContainerSystem(GGUI &iGui) : gui(iGui) {
 }
 
 GInventory* GContainerSystem::AddInventory(ACharacterBase *ch) {
-auto it = invs.find(ch);
+  auto it = invs.find(ch);
   if(it == invs.end()) {
     GInventory* inv = new GInventory(ch, gui, this);
     invs.insert(std::make_pair(ch, inv));
     return inv;
   }
+  gui.Show(it->second);
   return it->second;
 }
 
@@ -135,8 +151,10 @@ GContainer* GContainerSystem::AddContainer(APhysicObjectBase* obj) {
   if(it == conts.end()) {
     GContainer* cont = new GContainer(obj, gui, this);
     conts.insert(std::make_pair(obj, cont));
+    gui.Show(cont);
     return cont;
   }
+  //... вывести поверх всех
   return it->second;
 }
 
@@ -150,19 +168,16 @@ GContainer *GContainerSystem::GetContainer(APhysicObjectBase *obj) {
 
 
 GContainerSystem::~GContainerSystem() {
-  for(std::pair<ACharacterBase*, GInventory*> inv : invs) {
-    delete inv.second;
-  }
-  for(std::pair<APhysicObjectBase*, GContainer*> c : conts) {
-    delete c.second;
-    }
+  CloseAll();
 }
 
 void GContainerSystem::CloseAll() {
   for(auto p : conts) {
+    p.second->Hide();
     delete p.second;
   }
   for(auto p : invs) {
+    p.second->Hide();
     delete p.second;
   }
   conts.clear();
@@ -174,7 +189,8 @@ void GContainerSystem::CloseAll() {
 void GContainerSystem::RemoveInventory(ACharacterBase *ch) {
   auto it = invs.begin();
   if((it = invs.find(ch)) != invs.end()) {
-    delete it->second;
+    mForRemoval.push_back(it->second);
+    it->second->Hide();
     invs.erase(it);
   } else throw std::logic_error("inventory with required id doesn't exist");
 }
@@ -183,9 +199,12 @@ void GContainerSystem::RemoveInventory(ACharacterBase *ch) {
 void GContainerSystem::RemoveContainer(APhysicObjectBase *obj) {
   auto it = conts.begin();
   if((it = conts.find(obj)) != conts.end()) {
-    delete it->second;
+    mForRemoval.push_back(it->second);
+    it->second->Hide();
     conts.erase(it);
+
   } else throw std::logic_error("container with required id doesn't exist");
+  //dout << L"WARNING!!! Container with id " + std::to_wstring(obj->GetID()) + L"doesn't exist";
 }
 
 
