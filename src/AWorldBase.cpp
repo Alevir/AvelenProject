@@ -43,7 +43,7 @@ using namespace std;
 
 AWorldBase::AWorldBase() {
   Config cfg;
-   try {
+  try {
     cfg.readFile("../resources/SPWorldSettings.cfg");
   } catch (libconfig::ParseException& ex) {
     std::cout << "file: " << ex.getFile() << "\nline: " << ex.getLine()
@@ -51,6 +51,8 @@ AWorldBase::AWorldBase() {
       throw ex;
   }
   cfg.lookupValue("world", WorldPath);
+  if(cfg.lookupValue("graphics", frameLengthG)) frameLengthG = SECOND / frameLengthG;
+  if(cfg.lookupValue("physics", frameLengthP)) frameLengthP = SECOND / frameLengthP;
   physicWorld = new b2World(b2Vec2(0,0));
   physicWorld->SetContactListener(new AContactListener());
   _curTimeG = _curTimeP = boost::date_time::microsec_clock<ptime>::local_time();
@@ -170,7 +172,8 @@ double AWorldBase::LogicStep() {
     _timeCountP += delta;
     if(_timeCountP > frameLengthP) {
       _logicStep(frameLengthP);
-      _timeCountP = 0;
+      _timeCountP -= frameLengthP;
+      if(_timeCountP > SECOND) throw std::logic_error("");
     }
     return frameLengthP;
   } else {
@@ -181,19 +184,14 @@ double AWorldBase::LogicStep() {
 
 void AWorldBase::GraphicStep() {
   _prevTimeG = _curTimeG;
-  static int fpsCount = 0;
-  fpsCount++;
   _curTimeG = boost::date_time::microsec_clock<ptime>::local_time();
   double delta = (_curTimeG - _prevTimeG).total_microseconds();
   _timeCountG += delta;
-  if(_timeCountG > SECOND) {
-    _timeCountG = 0;
-    fpsCount = 0;
+  if(_timeCountG > frameLengthG) {
+    _graphicStep(frameLengthG);
+    _timeCountG -= frameLengthG;
+    if(_timeCountG > SECOND) throw std::logic_error("");
   }
-  //if(_timeCountG > frameLengthG) {
-    _graphicStep(/*frameLengthG*/ delta);
- //   _timeCountG -= frameLengthG;
- // }
 }
 
 ALocationBase* AWorldBase::getLocation(int x, int y) {
@@ -336,7 +334,7 @@ void AWorldBase::_logicStep(double dt) {
       }
     }
   }
-  physicWorld->Step(dt/SECOND, 5, 5);
+  physicWorld->Step(dt/SECOND, 3, 3);
 }
 
 

@@ -49,6 +49,16 @@ AWorldSFML::~AWorldSFML() {
 void AWorldSFML::_graphicStep(double dt) {
 
 
+
+
+  if(!mGrPause) {
+    for(std::pair<double, APhysicObjectSFML*> p : drawContainer) {
+      p.second->Extrapolate(dt);
+    }
+  } else {
+    mGrPause = false;
+  }
+
   Camera.Step();
   ASprite::RecountRenderBorders();
   auto c = Camera.GetPosition();
@@ -66,18 +76,13 @@ void AWorldSFML::_graphicStep(double dt) {
     }
   }
 
+
   for(std::pair<double, APhysicObjectSFML*> p : drawContainer) {
     p.second->Display(dt);
   }
 
 
-if(!mGrPause) {
-  for(std::pair<double, APhysicObjectSFML*> p : drawContainer) {
-    p.second->Extrapolate(dt);
-  }
-} else {
-  mGrPause = false;
-}
+
 
 
 

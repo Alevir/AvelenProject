@@ -82,7 +82,7 @@ void APhysicObjectSFML::Extrapolate(double dt) {
     wasChanged = false;
   } else {
     for(int i = 0; i < 3; i++) {
-      mExtraCoord[i] = c[i] + vc[i] * deltaAc / SECOND + ac[i] * deltaAc * deltaAc / SECOND / 2;
+      mExtraCoord[i] = c[i] + vc[i] * deltaAc / SECOND + ac[i] * deltaAc * deltaAc  / SECOND / 2;
      /*std::cout << vc[i] * deltaAc / SECOND << std::endl;
       std::cout << ac[i] * deltaAc * deltaAc / SECOND << std::endl;*/
     }

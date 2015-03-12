@@ -48,8 +48,7 @@ public:
 };
 
 
-class AWorldSFML
-    : public AWorldBase {
+class AWorldSFML : public AWorldBase {
   friend class ALocationSFML;
   std::multimap<double, APhysicObjectSFML*> drawContainer;
   virtual void _graphicStep(double dt);
