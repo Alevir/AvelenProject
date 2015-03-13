@@ -38,6 +38,7 @@ class AControllerBase {
   int mDirSum;
   int mDirCount;
   double mT = 0.0;
+  double mDT = 1000000.0;
 protected:
 
   const char RIGHT = 0;

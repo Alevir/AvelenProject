@@ -31,7 +31,6 @@ class Action;
 //#include "ACombatModelBase.h"
 class ACombatModelBase;
 class AttackAction;
-class MovementAction;
 class AKeyboardControllerSFML;
 #include "Character/Effects.hpp"
 /*
@@ -93,7 +92,6 @@ class ACharacterBase
   friend class AContactListener;
   friend class ACombatModelBase;
   friend class AttackAction;
-  friend class MovementAction;
   friend class AKeyboardControllerSFML;
   friend class ALocationBase;
   friend Effect* Effect::CreateEffect(const EffectData &ed, ACharacterBase *ch);

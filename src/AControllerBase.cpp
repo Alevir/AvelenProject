@@ -38,6 +38,7 @@ AControllerBase::AControllerBase(ACharacterBase *iNPC) {
 }
 
 void AControllerBase::Step(double dt) {
+  mDT = dt;
   subStep(dt);
   if(mIdle) {
     character->mCurMovState = MoveState::Idle;
@@ -45,11 +46,12 @@ void AControllerBase::Step(double dt) {
   mIdle = true;
 }
 
+
 void AControllerBase::moveForward() {
   double factor = 20;
   mIdle = false;
   character->mCurMovState = MoveState::MoveForward;
-  character->ApplyLinearImpulse(AVector2(0, 1).Rotate(character->GetAngle()) *= factor/* * method(mT)*/);
+  character->ApplyLinearImpulse(AVector2(0, 1 * mDT / 33333.0).Rotate(character->GetAngle()) *= factor/* * method(mT)*/);
 }
 
 
@@ -58,29 +60,29 @@ void AControllerBase::moveBack() {
   double factor = 10;
   character->mCurMovState = MoveState::MoveBack;
   mIdle = false;
-  character->ApplyLinearImpulse(AVector2(0, -1).Rotate(character->GetAngle()) *= factor/* * method(mT)*/);
+  character->ApplyLinearImpulse(AVector2(0, -1 * mDT / 33333.0).Rotate(character->GetAngle()) *= factor/* * method(mT)*/);
 }
 
 void AControllerBase::moveRight() {
   double factor = 10;
-  character->ApplyLinearImpulse(AVector2(-1, 0).Rotate(character->GetAngle()) *= factor/* * method(mT)*/);
+  character->ApplyLinearImpulse(AVector2(-1 * mDT / 33333.0, 0).Rotate(character->GetAngle()) *= factor/* * method(mT)*/);
 }
 
 void AControllerBase::MoveLeft() {
   double factor = 10;
-  character->ApplyLinearImpulse(AVector2(1, 0).Rotate(character->GetAngle()) *= factor /** method(mT)*/);
+  character->ApplyLinearImpulse(AVector2(1 * mDT / 33333.0, 0).Rotate(character->GetAngle()) *= factor /** method(mT)*/);
 }
 
 
 void AControllerBase::turn(char side){
   if(side) {
-    character->ApplyAngularImpulse(0.1);
+    character->ApplyAngularImpulse(0.1 * mDT / 33333.0);
   } else {
-    character->ApplyAngularImpulse(-0.1);
+    character->ApplyAngularImpulse(-0.1 * mDT / 33333.0);
   }
 }
 
 void AControllerBase::turn(int angleMeasure) {
-character->ApplyAngularImpulse(0.002 * angleMeasure);
+character->ApplyAngularImpulse(0.002 * angleMeasure * mDT / 66666.0);
 }
 

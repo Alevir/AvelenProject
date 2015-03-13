@@ -158,6 +158,9 @@ public:
   void ApplyLinearImpulse(double x, double y);
   void ApplyAngularImpulse(double w);
   void ApplyLinearImpulse(b2Vec2 v);
+
+  void ApplyLinearVelocity(b2Vec2 v);
+  void ApplyAngularVelocity(double w);
   ALocationBase* GetLocation() { return mLoc; }
 
 

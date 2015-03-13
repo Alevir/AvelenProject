@@ -84,22 +84,21 @@ protected:
   virtual ALocationBase* newLocation(libconfig::Config& locationDesc, const ContextLocArgs& la) = 0;
 
 
-  //physic
-  ptime _curTimeP;
-  ptime _prevTimeP;  
-  double _timeCountP = 0.0;
-  double frameLengthP = SECOND / 30.0;
 
-  //graphic
-  ptime _curTimeG;
-  ptime _prevTimeG;
-  double _timeCountG = 0.0;
-  double frameLengthG = SECOND / 60.0;
+  struct timeControlData {
+    ptime curTime;
+    ptime prevTime;
+    double timeCount = 0.0;
+    double frameLength = SECOND / 30.0;
+  };
+  timeControlData physicTCD, graphicTCD;
+
 
  /* ALogicalThread* pLThread;
   boost::thread* pBoostLThread;*/
 
   int FPSCount = 0;
+  double FPSTimeCount = 0.0;
 
 
   AContactListener* cl;
@@ -124,7 +123,7 @@ protected:
 public:
   const std::string locationsPath = "../resources/locations/";
   AScriptWrapper& GetScriptWrapper();
-  double GetLogicFrameLength() { return frameLengthP; }
+  double GetLogicFrameLength() { return physicTCD.frameLength; }
   ACharacterBase* GetPlayer() { return player; }
 
 

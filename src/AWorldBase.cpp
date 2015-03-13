@@ -51,12 +51,12 @@ AWorldBase::AWorldBase() {
       throw ex;
   }
   cfg.lookupValue("world", WorldPath);
-  if(cfg.lookupValue("graphics", frameLengthG)) frameLengthG = SECOND / frameLengthG;
-  if(cfg.lookupValue("physics", frameLengthP)) frameLengthP = SECOND / frameLengthP;
+  if(cfg.lookupValue("graphics", graphicTCD.frameLength)) graphicTCD.frameLength = SECOND / graphicTCD.frameLength;
+  if(cfg.lookupValue("physics", physicTCD.frameLength)) physicTCD.frameLength = SECOND / physicTCD.frameLength;
   physicWorld = new b2World(b2Vec2(0,0));
   physicWorld->SetContactListener(new AContactListener());
-  _curTimeG = _curTimeP = boost::date_time::microsec_clock<ptime>::local_time();
   scriptWrapper = new AScriptWrapper(this);
+  physicTCD.curTime = graphicTCD.curTime = boost::date_time::microsec_clock<ptime>::local_time();
 }
 
 AWorldBase::~AWorldBase() {
@@ -74,11 +74,11 @@ void AWorldBase::QueryAABB(b2QueryCallback *callback, const b2AABB &aabb) const 
 }
 
 void AWorldBase::RayCast(b2RayCastCallback *callback, const b2Vec2 &point1, const b2Vec2 &point2) const {
-physicWorld->RayCast(callback, point1, point2);
+  physicWorld->RayCast(callback, point1, point2);
 }
 
 void AWorldBase::AddMessage(const wstring& m) {
-std::wcout << m << std::endl;
+  std::wcout << m << std::endl;
 }
 
 void AWorldBase::LoadLocation(int x, int y) {
@@ -166,16 +166,22 @@ void AWorldBase::Reload(const string& savePath) {
 
 double AWorldBase::LogicStep() {
   if(!pause) {
-    _prevTimeP = _curTimeP;
-    _curTimeP = boost::date_time::microsec_clock<ptime>::local_time();
-    double delta = (_curTimeP - _prevTimeP).total_microseconds();
-    _timeCountP += delta;
-    if(_timeCountP > frameLengthP) {
-      _logicStep(frameLengthP);
-      _timeCountP -= frameLengthP;
-      if(_timeCountP > SECOND) throw std::logic_error("");
+    physicTCD.prevTime = physicTCD.curTime;
+    physicTCD.curTime = boost::date_time::microsec_clock<ptime>::local_time();
+    double delta = (physicTCD.curTime - physicTCD.prevTime).total_microseconds();
+    physicTCD.timeCount += delta;
+    FPSTimeCount += delta;
+    if(physicTCD.timeCount > physicTCD.frameLength) {
+      _logicStep(physicTCD.timeCount);
+      physicTCD.timeCount = 0;
+      ++FPSCount;
+      if(FPSTimeCount > SECOND) {
+      FPSTimeCount -= SECOND;
+      std::cout << "LFPS: " << FPSCount << "\n";
+      FPSCount = 0;
     }
-    return frameLengthP;
+    }
+    return physicTCD.frameLength;
   } else {
     pause = false;
     return 0;
@@ -183,15 +189,16 @@ double AWorldBase::LogicStep() {
 }
 
 void AWorldBase::GraphicStep() {
-  _prevTimeG = _curTimeG;
-  _curTimeG = boost::date_time::microsec_clock<ptime>::local_time();
-  double delta = (_curTimeG - _prevTimeG).total_microseconds();
-  _timeCountG += delta;
-  if(_timeCountG > frameLengthG) {
-    _graphicStep(frameLengthG);
-    _timeCountG -= frameLengthG;
-    if(_timeCountG > SECOND) throw std::logic_error("");
-  }
+  graphicTCD.prevTime = graphicTCD.curTime;
+  graphicTCD.curTime = boost::date_time::microsec_clock<ptime>::local_time();
+  double delta = (graphicTCD.curTime - graphicTCD.prevTime).total_microseconds();
+  /*graphicTCD.timeCount += delta;
+  if(graphicTCD.timeCount > graphicTCD.frameLength) {*/
+
+    //_graphicStep(graphicTCD.timeCount);
+    _graphicStep(delta);
+    //graphicTCD.timeCount = 0;
+  //}
 }
 
 ALocationBase* AWorldBase::getLocation(int x, int y) {

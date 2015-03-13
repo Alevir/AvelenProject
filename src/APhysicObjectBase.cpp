@@ -337,8 +337,21 @@ void APhysicObjectBase::ApplyAngularImpulse(double w) {
 }
 
 void APhysicObjectBase::ApplyLinearImpulse(b2Vec2 v) {
-  body->ApplyLinearImpulse(v, body->GetWorldCenter(), true);
+body->ApplyLinearImpulse(v, body->GetWorldCenter(), true);
 }
+
+void APhysicObjectBase::ApplyLinearVelocity(b2Vec2 v) {
+  if(body) {
+    body->SetLinearVelocity(v);
+  } else throw std::logic_error("");
+}
+
+void APhysicObjectBase::ApplyAngularVelocity(double w) {
+  if(body) {
+    body->SetAngularVelocity(w);
+  } else throw std::logic_error("");
+}
+
 
 
 void APhysicObjectBase::SetDamping(double d) {

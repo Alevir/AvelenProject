@@ -104,14 +104,18 @@ Game::Game() {
   sf::ContextSettings cs;
 
 
+  string vsync;
   cfg.lookupValue("window.antialiasingLevel", cs.antialiasingLevel);
+  cfg.lookupValue("window.VSync", vsync);
+
   std::cout << cs.antialiasingLevel << '\n';
   string name;
   res.lookupValue("name", name);
   Window = new sf::RenderWindow(vm, name, 0/* sf::Style::None*/, cs);
   Window->setIcon(gimp_image.width, gimp_image.height, gimp_image.pixel_data);
   Window->setActive();
-  Window->setVerticalSyncEnabled(true);
+  Window->setVerticalSyncEnabled(vsync == "yes");
+
 
   libconfig::Setting& font = cfg.lookup("defaultFont");
   //gui::DefaultFont.loadFromFile((const char*)font["path"]);

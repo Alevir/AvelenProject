@@ -80,6 +80,7 @@ void SinglePlayerMode::_run() {
 
 
 
+
   while(window->isOpen()) {
     sf::Event event;
     if(saveW.IsVisible()) {
