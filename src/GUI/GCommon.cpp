@@ -267,3 +267,9 @@ void GGUI::HandleEvent(sf::Event& event) {
     Gui.handleEvent(event);
   }
 }
+
+
+void GuiWindowReusable::Hide() {
+  Gui.OnHideOrClose(this);
+  mWindow->hide();
+}

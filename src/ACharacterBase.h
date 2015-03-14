@@ -108,6 +108,11 @@ class ACharacterBase
   double mReg;
   double mXP;
   const CharacterRace* mRace;
+
+
+
+
+
 protected:
   virtual void Destroy();
   virtual ~ACharacterBase();
@@ -115,8 +120,12 @@ protected:
   double mMaxHP = 100.0;
   double mEP = 100.0;
   double mMaxEP = 100.0;
+
+
   MoveState mCurMovState = MoveState::Idle;
   MoveState mPrevMovState = MoveState::Idle;
+  double mStateTimeCount = 1.001;
+  double mStatePeriod = 1.0;
 
 public:
   const std::map<std::string, Effect*>& GetEffects();

@@ -59,6 +59,13 @@ class AWorldSFML : public AWorldBase {
   ALocationBase* newLocation(libconfig::Config& locationDesc, const ContextLocArgs& la);
 
   bool mGrPause = false;
+
+  sf::RenderTexture shadowTex;
+  sf::RenderStates shadowRS;
+  sf::Color dayTime;
+  sf::Sprite rs;
+  sf::Texture lightTex;
+  sf::Sprite light;
 public:
   void OneStepPause();
 

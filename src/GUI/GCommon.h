@@ -60,6 +60,11 @@ public:
 
 };
 
+
+
+
+
+
 class GuiWindow : public GuiWindowBase {
 protected:
   AVector2 _initPos;
@@ -73,6 +78,15 @@ public:
   void SwitchVisibility();
   bool IsVisible() { return mWindow->isVisible(); }
   virtual ~GuiWindow() {}
+};
+
+
+class GuiWindowReusable : public GuiWindow {
+
+public:
+  void Hide();
+  GuiWindowReusable (GGUI& gui) : GuiWindow(gui) {}
+  virtual ~GuiWindowReusable() {}
 };
 
 

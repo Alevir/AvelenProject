@@ -23,6 +23,13 @@
 #include "ACharacterBase.h"
 
 
+class GCharacterInfo : public GuiWindowReusable {
+
+public:
+  GCharacterInfo(GGUI& gui);
+};
+
+
 class GPlayerInterface {
   ACharacterBase* mPlayer;
   sf::RectangleShape HPState;

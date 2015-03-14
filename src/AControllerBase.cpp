@@ -50,7 +50,10 @@ void AControllerBase::Step(double dt) {
 void AControllerBase::moveForward() {
   double factor = 20;
   mIdle = false;
-  character->mCurMovState = MoveState::MoveForward;
+  if(character->mCurMovState != MoveState::MoveForward) {
+    character->mCurMovState = MoveState::MoveForward;
+  }
+
   character->ApplyLinearImpulse(AVector2(0, 1 * mDT / 33333.0).Rotate(character->GetAngle()) *= factor/* * method(mT)*/);
 }
 

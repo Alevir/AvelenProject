@@ -159,3 +159,8 @@ void GPlayerInterface::MessageBar::Step(double dt) {
     lMessage->hide();
   }
 }
+
+
+GCharacterInfo::GCharacterInfo(GGUI& gui) : GuiWindowReusable(gui) {
+
+}

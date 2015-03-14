@@ -32,8 +32,43 @@
 #include "ADebugOutput.h"
 #include "GUI/GInGame.hpp"
 using namespace std;
+double sz;
 
-AWorldSFML::AWorldSFML() {
+AWorldSFML::AWorldSFML() : shadowRS(sf::BlendMultiply) {
+  using namespace libconfig;
+  Config cfg;
+  cfg.readFile("test.cfg");
+  dayTime.a  = (int)cfg.lookup("a");
+  dayTime.r  = (int)cfg.lookup("r");
+  dayTime.g  = (int)cfg.lookup("g");
+  dayTime.b  = (int)cfg.lookup("b");
+
+  ASprite::RecountRenderBorders();
+  sz = ASprite::renderRadius * 2 * PIXELS_IN_METER;
+  shadowTex.create(sz, sz);
+  shadowTex.clear(dayTime);
+
+  lightTex.loadFromFile("light.png");
+  light.setTexture(lightTex);
+  light.setOrigin(lightTex.getSize().x / 2, lightTex.getSize().y / 2);
+  light.setPosition(sz/2, sz/2);
+  shadowTex.draw(light, sf::RenderStates(sf::BlendAdd));
+  shadowTex.display();
+
+
+
+  //light source texture gen
+ /* sf::Image im;
+  im.create(256, 256, sf::Color(0,0,0,255));
+  for(int i = 0; i < 256; ++i) {
+    for(int j = 0; j < 256; ++j) {
+      double dist = sqrt((i - 128) * (i - 128) + (j - 128) * (j - 128));
+      if(dist > 127.0) continue;
+      double r = 127 * (1 + cos(dist / 45.0));
+      im.setPixel(i, j, sf::Color(r,r,r,255));
+    }
+  }
+  im.saveToFile("light.png");*/
 }
 
 AWorldSFML::AWorldSFML(const string &startLocationName) {
@@ -61,6 +96,10 @@ void AWorldSFML::_graphicStep(double dt) {
 
   Camera.Step();
   ASprite::RecountRenderBorders();
+  //rs.setSize(sf::Vector2f(sz, sz));
+  rs.setOrigin(sf::Vector2f(sz/2, sz/2));
+  rs.setPosition(Game::Window->getView().getCenter());
+  rs.setTexture(shadowTex.getTexture());
   auto c = Camera.GetPosition();
   findLocation(c.x, c.y);
   LoadLocation(int(c.x), int(c.y));
@@ -81,8 +120,8 @@ void AWorldSFML::_graphicStep(double dt) {
     p.second->Display(dt);
   }
 
-
-
+  Game::Window->draw(rs, shadowRS);
+  
 
 
 
