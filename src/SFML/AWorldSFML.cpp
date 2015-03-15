@@ -29,6 +29,8 @@
 #include "ATextureContainer.h"
 #include "ASpriteContainer.h"
 
+#include <SFML/Graphics/RenderTexture.hpp>
+
 #include "ADebugOutput.h"
 #include "GUI/GInGame.hpp"
 using namespace std;
@@ -43,32 +45,44 @@ AWorldSFML::AWorldSFML() : shadowRS(sf::BlendMultiply) {
   dayTime.g  = (int)cfg.lookup("g");
   dayTime.b  = (int)cfg.lookup("b");
 
-  ASprite::RecountRenderBorders();
-  sz = ASprite::renderRadius * 2 * PIXELS_IN_METER;
-  shadowTex.create(sz, sz);
-  shadowTex.clear(dayTime);
 
-  lightTex.loadFromFile("light.png");
-  light.setTexture(lightTex);
-  light.setOrigin(lightTex.getSize().x / 2, lightTex.getSize().y / 2);
-  light.setPosition(sz/2, sz/2);
-  shadowTex.draw(light, sf::RenderStates(sf::BlendAdd));
-  shadowTex.display();
-
+  mLights.insert(new ALightSourceSFML(1.0, AVector2(1.0, 1.0), sf::Color::Red));
+  mLights.insert(new ALightSourceSFML(2.0, AVector2(3.0, 3.0), sf::Color::Green));
+  mLights.insert(new ALightSourceSFML(2.0, AVector2(5.0, 3.0), sf::Color::Blue));
+  mLights.insert(new ALightSourceSFML(2.0, AVector2(4.0, 4.0), sf::Color::Red));
 
 
   //light source texture gen
- /* sf::Image im;
+  /*sf::Image im;
   im.create(256, 256, sf::Color(0,0,0,255));
   for(int i = 0; i < 256; ++i) {
     for(int j = 0; j < 256; ++j) {
       double dist = sqrt((i - 128) * (i - 128) + (j - 128) * (j - 128));
       if(dist > 127.0) continue;
-      double r = 127 * (1 + cos(dist / 45.0));
+      double r = 255 - 2 * dist;//127 * (cos(atan(1.0 / (dist / 128))));
       im.setPixel(i, j, sf::Color(r,r,r,255));
     }
   }
   im.saveToFile("light.png");*/
+
+
+
+  ASprite::RecountRenderBorders();
+  sz = ASprite::renderRadius * 2 * PIXELS_IN_METER;
+  shadowTex.create(sz, sz);
+  /*shadowTex.clear(dayTime);
+
+  lightTex.loadFromFile("light.png");
+  light.setTexture(lightTex);
+  light.setOrigin(lightTex.getSize().x / 2, lightTex.getSize().y / 2);
+  light.setPosition(sz/2, sz/2);
+  light.setColor(sf::Color::Cyan);
+  light.setScale(2.0, 2.0);
+  shadowTex.draw(light, sf::RenderStates(sf::BlendAdd));*/
+ /* light.setPosition(sz/2, sz/2 - 3 * PIXELS_IN_METER);
+  light.setColor(sf::Color::Red);
+  shadowTex.draw(light, sf::RenderStates(sf::BlendAdd));*/
+
 }
 
 AWorldSFML::AWorldSFML(const string &startLocationName) {
@@ -97,9 +111,8 @@ void AWorldSFML::_graphicStep(double dt) {
   Camera.Step();
   ASprite::RecountRenderBorders();
   //rs.setSize(sf::Vector2f(sz, sz));
-  rs.setOrigin(sf::Vector2f(sz/2, sz/2));
-  rs.setPosition(Game::Window->getView().getCenter());
-  rs.setTexture(shadowTex.getTexture());
+
+
   auto c = Camera.GetPosition();
   findLocation(c.x, c.y);
   LoadLocation(int(c.x), int(c.y));
@@ -120,8 +133,30 @@ void AWorldSFML::_graphicStep(double dt) {
     p.second->Display(dt);
   }
 
+
+  shadowTex.clear(dayTime);
+  for(ALightSourceBase* l : mLights) {
+    auto ll = (ALightSourceSFML*)(l);
+    ll->SetShadowTexture(&shadowTex, GetPlayer()->GetPosition());
+    ll->Illumine(0);
+  }
+  shadowTex.display();
+  rs.setTexture(shadowTex.getTexture(), true);
+  rs.setOrigin(rs.getTextureRect().width / 2, rs.getTextureRect().height / 2);
+  rs.setPosition(Game::Window->getView().getCenter());
+
   Game::Window->draw(rs, shadowRS);
-  
+  if(focused) {
+    Game::Window->draw(focusedShape);
+    focused = false;
+  }
+
+  /*sf::CircleShape test;
+  test.setRadius(5);
+  test.setOrigin(5,5);
+  test.setFillColor(sf::Color::White);
+  test.setPosition(1.0 * PIXELS_IN_METER, -1.0 * PIXELS_IN_METER);
+  Game::Window->draw(test);*/
 
 
 
@@ -276,4 +311,32 @@ AVector2 ACamera::GetPosition() {
   p.x /= PIXELS_IN_METER;
   p.y = -p.y / PIXELS_IN_METER;
   return p;
+}
+
+
+ALightSourceSFML::ALightSourceSFML(double intensity, const AVector2& position, const sf::Color& color)
+  : ALightSourceBase(intensity, position, color) {}
+
+void ALightSourceSFML::SetShadowTexture(sf::RenderTexture* shadow, const AVector2& pos) {
+  mShadow = shadow;
+  mViewPos = pos;
+}
+
+void ALightSourceSFML::Illumine(double dt) {
+  if(!mShadow) throw std::logic_error("");
+  sf::Sprite light;
+  sf::Texture lt;
+  lt.loadFromFile("light.png");
+  light.setTexture(lt);
+  light.setOrigin(light.getTextureRect().width / 2, light.getTextureRect().height / 2);
+  light.setColor(mColor);
+  auto p = mPos - mViewPos;
+  //auto p = mViewPos - mPos;
+  p.y = -p.y;
+  p *= PIXELS_IN_METER;
+  light.setPosition(mShadow->getSize().x / 2 + p.x,
+                    mShadow->getSize().y / 2 + p.y);
+  light.setScale(mInt, mInt);
+  mShadow->draw(light, sf::RenderStates(sf::BlendAdd));
+  mShadow = 0;
 }

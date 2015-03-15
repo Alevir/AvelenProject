@@ -35,6 +35,16 @@ class ASprite;
 #include <SFML/Audio.hpp>
 
 
+
+class ALightSourceSFML : public ALightSourceBase {
+  sf::RenderTexture* mShadow = 0;
+  AVector2 mViewPos;
+public:
+  ALightSourceSFML(double intensity, const AVector2& position, const sf::Color& color);
+  void SetShadowTexture(sf::RenderTexture* shadow, const AVector2& pos);
+  virtual void Illumine(double dt);
+};
+
 class ACamera {
   APhysicObjectSFML* _obj = 0;
 public:
@@ -68,6 +78,9 @@ class AWorldSFML : public AWorldBase {
   sf::Sprite light;
 public:
   void OneStepPause();
+
+  sf::Sprite focusedShape;
+  bool focused = false;
 
   GPlayerInterface* Interface = 0;
   ACamera Camera;

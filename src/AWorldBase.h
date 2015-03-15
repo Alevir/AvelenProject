@@ -48,8 +48,18 @@ class ObjectInitArgs;
 
 using boost::posix_time::ptime;
 
+#include <SFML/Graphics/Color.hpp>
 
 
+class ALightSourceBase {
+protected:
+  double mInt;
+  AVector2 mPos;
+  sf::Color mColor;
+public:
+  virtual void Illumine(double dt) = 0;
+  ALightSourceBase(double intensity, const AVector2& position, const sf::Color& color);
+};
 
 
 class AWorldBase {
@@ -59,6 +69,7 @@ class AWorldBase {
 
   bool mWasPaused = false;
 protected:
+  std::set<ALightSourceBase*> mLights;
   bool pause = false;
   int locX = 0;
   int locY = 0;
@@ -159,6 +170,8 @@ public:
   void Reload(const std::string& savePath);
   void Load(const std::string& savePath);
   std::string WorldPath; //default path
+
+
 
 };
 

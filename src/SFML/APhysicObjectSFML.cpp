@@ -108,16 +108,42 @@ void APhysicObjectSFML::Display(double dt) {
 
   spr->setPosition(mExtraCoord[x] * PIXELS_IN_METER, - mExtraCoord[y] * PIXELS_IN_METER);
   spr->setRotation( -mExtraCoord[a]);
+
+
   if(flickering) {
-    sf::Color c = spr->getColor();
+    flickTime += dt;
+    sf::Sprite& s = sfmlWorld->focusedShape;
+    sf::Image im = spr->getTexture()->copyToImage();
+    int x = im.getSize().x;
+    int y = im.getSize().y;
+    for(int i = 0; i < x; ++i) {
+      for(int j = 0; j < y; ++j) {
+        if(im.getPixel(i,j).a > 10) {
+          im.setPixel(i,j,sf::Color(255, 255, 255, 255 * (sin(flickTime / 2.0e5) + 1) / 2)) ;
+        }
+      }
+    }
+    static sf::Texture tx;
+    tx.loadFromImage(im);
+    s.setTexture(tx,true);
+    s.setOrigin(spr->getOrigin());
+    s.setScale(spr->getScale());
+    s.setPosition(spr->getPosition());
+    s.setRotation(spr->getRotation());
+
+    /*sf::Color c = spr->getColor();
     flickTime -= dt;
     uint8 i = 150 + 105 * (sin(flickTime / 2.0e5) + 1) / 2;
     spr->setColor(sf::Color(i, i, 255));
     Game::Window->draw(*spr);
-    spr->setColor(c);
+    spr->setColor(c);*/
+    //Game::Window->draw(s);
     flickering = false;
-  } else
+    sfmlWorld->focused = true;
+  }
   Game::Window->draw(*spr);
+
+
 }
 
 

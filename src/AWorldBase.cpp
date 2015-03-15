@@ -371,3 +371,10 @@ void AWorldBase::findLocation(double& x, double& y) {
 AScriptWrapper& AWorldBase::GetScriptWrapper() {
   return *scriptWrapper;
 }
+
+
+ALightSourceBase::ALightSourceBase(double intensity,
+      const AVector2& position, const sf::Color& color)
+      : mInt(intensity), mPos(position), mColor(color) {
+
+}
