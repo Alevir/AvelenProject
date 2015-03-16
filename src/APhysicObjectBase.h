@@ -59,6 +59,8 @@ struct ObjectInitArgs {
   }
 };
 
+class ALightSourceBase;
+
 class APhysicObjectBase : public AObject{
   friend class ALocationBase;
   friend class ACombatModelBase;
@@ -88,7 +90,7 @@ protected:
   double HitPoints;
   double Protection;  // for armor
   double Sharpness = 0.5;   // for weapon
-  std::vector<EffectData> _storedEffects; //for potion
+  std::vector<EffectData> mStoredEffects; //for potion
 
   ALocationBase* mLoc;
 
@@ -99,6 +101,8 @@ protected:
   std::wstring mLabel;
   std::string mLabelNTr;
   APhysicObjectBase(const APhysicObjectData* data, ALocationBase* loc, const ObjectInitArgs& args);
+
+  ALightSourceBase* mLightSource = 0;
 
 public:
 
@@ -181,6 +185,9 @@ public:
   void SetScript(ScriptNode sn, const std::string& scr);
   void ExecuteScript(ScriptNode sn, APhysicObjectBase* triggeringObj);
   const std::vector<std::string>& GetScripts();
+
+
+
 };
 
 #endif // APHYSICOBJECT_H

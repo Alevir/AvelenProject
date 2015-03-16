@@ -33,7 +33,7 @@
 #include "AObjectFilter.hpp"
 #include "GUI/GInventory.h"
 #include "SFML/Audio.hpp"
-
+#include <iostream>
 
 
 
@@ -139,7 +139,7 @@ void SinglePlayerMode::_run() {
             }
           } else
           if (event.key.code == sf::Keyboard::Pause) {
-            assert(0);
+            std::cout << "camera" << world.Camera.GetPosition() << "\n";
           } else
           if (event.key.code == sf::Keyboard::P) {
             debug.Switch();

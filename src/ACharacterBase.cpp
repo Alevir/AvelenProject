@@ -111,7 +111,7 @@ void ACharacterBase::AddEffect(const EffectData& ed) {
 
 bool ACharacterBase::DrinkPotion(APhysicObjectBase *potion) {
   if(potion->templateData.objectType != APhysicObjectData::OT_Potion) return false;
-  for(EffectData& ef : potion->_storedEffects) {
+  for(EffectData& ef : potion->mStoredEffects) {
     AddEffect(ef);
   }
   mLoc->RemoveAObject(potion);

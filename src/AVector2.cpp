@@ -92,7 +92,7 @@ AVector2& AVector2::Rotate(double angle) {
   return *this;
 }
 
-std::ostream& operator << (std::ostream& stream, AVector2& v) {
+std::ostream& operator << (std::ostream& stream, const AVector2& v) {
   stream << " ( " << v.x << " , " << v.y << " ) " << std::endl;
   return stream;
 }

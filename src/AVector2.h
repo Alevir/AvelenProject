@@ -62,6 +62,6 @@ public:
 
 };
 
-std::ostream& operator << (std::ostream& stream, AVector2&);
+std::ostream& operator << (std::ostream& stream, const AVector2&);
 
 #endif // AVECTOR2_H

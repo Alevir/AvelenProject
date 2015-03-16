@@ -72,6 +72,7 @@ public:
   static AObjectTemplatesContainer<APhysicObjectData>* ObjectTemplatesContainer;
   static AObjectTemplatesContainer<ACharacterData>* CharacterTemplatesContainer;
   static std::string Language;
+  static int LightQuality;
   static std::string GuiConfFileName;
   static std::string DefaultFont;
   static std::string TranslationsPath;

@@ -48,6 +48,7 @@ AObjectTemplatesContainer<APotionRecipe>* Game::PotionRecipes;
 AObjectTemplatesContainer<AExtractionRecipe>* Game::ExtractionRecipes;
 ATranslationReader* Game::ObjectLabels;
 sf::Vector2u Game::LocLoadNum;
+int Game::LightQuality;
 
 const std::string Game::ResourcesPath = "../resources/";
 
@@ -107,6 +108,7 @@ Game::Game() {
   string vsync;
   cfg.lookupValue("window.antialiasingLevel", cs.antialiasingLevel);
   cfg.lookupValue("window.VSync", vsync);
+  LightQuality = cfg.lookup("window.LightQuality");
 
   std::cout << cs.antialiasingLevel << '\n';
   string name;

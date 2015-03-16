@@ -46,24 +46,39 @@ AWorldSFML::AWorldSFML() : shadowRS(sf::BlendMultiply) {
   dayTime.b  = (int)cfg.lookup("b");
 
 
-  mLights.insert(new ALightSourceSFML(1.0, AVector2(1.0, 1.0), sf::Color::Red));
-  mLights.insert(new ALightSourceSFML(2.0, AVector2(3.0, 3.0), sf::Color::Green));
-  mLights.insert(new ALightSourceSFML(2.0, AVector2(5.0, 3.0), sf::Color::Blue));
-  mLights.insert(new ALightSourceSFML(2.0, AVector2(4.0, 4.0), sf::Color::Red));
-
-
   //light source texture gen
   /*sf::Image im;
-  im.create(256, 256, sf::Color(0,0,0,255));
-  for(int i = 0; i < 256; ++i) {
-    for(int j = 0; j < 256; ++j) {
-      double dist = sqrt((i - 128) * (i - 128) + (j - 128) * (j - 128));
-      if(dist > 127.0) continue;
-      double r = 255 - 2 * dist;//127 * (cos(atan(1.0 / (dist / 128))));
+  const int size = 256;
+  im.create(size, size, sf::Color(0,0,0,255));
+  double r;
+  double dist;
+  double linLim = 0.5;
+  double linLimitInt = (cos(atan((size/2 * linLim /3 / Game::LightQuality))));
+
+  for(int i = 0; i < size; ++i) {
+    for(int j = 0; j < size; ++j) {
+      dist = sqrt((i - size/2) * (i - size/2) + (j - size/2) * (j - size/2));
+      if(dist > double(size/2 - 1)) continue;
+      if(dist < size/2 * linLim) {
+        r = 255 * (cos(atan((dist/3 / Game::LightQuality))));
+      } else {
+        r = 255 * linLimitInt * (1.0 - 2*(double(dist) / size * 2 - linLim));
+      }
       im.setPixel(i, j, sf::Color(r,r,r,255));
     }
   }
-  im.saveToFile("light.png");*/
+  im.saveToFile("light1.png");*/
+
+  ALightSourceSFML::Init();
+
+
+  mLights.insert(new ALightSourceSFML(20.0, AVector2(3.0, 3.0), sf::Color::Cyan));
+  mLights.insert(new ALightSourceSFML(20.0, AVector2(9.0, 9.0), sf::Color(150, 255,140)));
+  mLights.insert(new ALightSourceSFML(20.0, AVector2(10.0, 4.0), sf::Color(80,100, 255)));
+
+
+
+
 
 
 
@@ -110,15 +125,14 @@ void AWorldSFML::_graphicStep(double dt) {
 
   Camera.Step();
   ASprite::RecountRenderBorders();
-  //rs.setSize(sf::Vector2f(sz, sz));
 
-
-  auto c = Camera.GetPosition();
+  AVector2 c = Camera.GetPosition();
+  AVector2 cc = c;
   findLocation(c.x, c.y);
   LoadLocation(int(c.x), int(c.y));
+  c = cc;
 
-  auto v = GetPlayer()->GetPosition();
-  listener.setPosition(v.x, 0, v.y);
+  listener.setPosition(c.x, 0, c.y);
 
   for(int q = 0; q < 4; ++q) {
     for(auto& v : mMap[q]) {
@@ -137,7 +151,7 @@ void AWorldSFML::_graphicStep(double dt) {
   shadowTex.clear(dayTime);
   for(ALightSourceBase* l : mLights) {
     auto ll = (ALightSourceSFML*)(l);
-    ll->SetShadowTexture(&shadowTex, GetPlayer()->GetPosition());
+    ll->SetShadowTexture(&shadowTex, c);
     ll->Illumine(0);
   }
   shadowTex.display();
@@ -305,14 +319,28 @@ void ACamera::SetPosition(const AVector2 &pos) {
 }
 
 AVector2 ACamera::GetPosition() {
-  AVector2 p;
+  AVector2 p = 0;
+
   sf::View vv = Game::Window->getView();
-  p = vv.getCenter();
-  p.x /= PIXELS_IN_METER;
-  p.y = -p.y / PIXELS_IN_METER;
+  p += vv.getCenter();
+  p /= PIXELS_IN_METER;
+  p.y = -p.y;
+  //std::cout << p << "\n";
   return p;
 }
 
+
+sf::Sprite ALightSourceSFML::mLight;
+sf::Texture ALightSourceSFML::mLTex;
+
+void ALightSourceSFML::Init() {
+  std::string path("light");
+  path.push_back('0' + Game::LightQuality);
+  path.append(".png");
+  mLTex.loadFromFile(path);
+  mLight.setTexture(mLTex);
+  mLight.setOrigin(mLight.getTextureRect().width / 2, mLight.getTextureRect().height / 2);
+}
 
 ALightSourceSFML::ALightSourceSFML(double intensity, const AVector2& position, const sf::Color& color)
   : ALightSourceBase(intensity, position, color) {}
@@ -324,19 +352,15 @@ void ALightSourceSFML::SetShadowTexture(sf::RenderTexture* shadow, const AVector
 
 void ALightSourceSFML::Illumine(double dt) {
   if(!mShadow) throw std::logic_error("");
-  sf::Sprite light;
-  sf::Texture lt;
-  lt.loadFromFile("light.png");
-  light.setTexture(lt);
-  light.setOrigin(light.getTextureRect().width / 2, light.getTextureRect().height / 2);
-  light.setColor(mColor);
+  mLight.setColor(mColor);
   auto p = mPos - mViewPos;
   //auto p = mViewPos - mPos;
   p.y = -p.y;
   p *= PIXELS_IN_METER;
-  light.setPosition(mShadow->getSize().x / 2 + p.x,
+  mLight.setPosition(mShadow->getSize().x / 2 + p.x,
                     mShadow->getSize().y / 2 + p.y);
-  light.setScale(mInt, mInt);
-  mShadow->draw(light, sf::RenderStates(sf::BlendAdd));
+  double sc = mInt / Game::LightQuality;
+  mLight.setScale(sc, sc);
+  mShadow->draw(mLight, sf::RenderStates(sf::BlendAdd));
   mShadow = 0;
 }

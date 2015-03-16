@@ -52,10 +52,12 @@ using boost::posix_time::ptime;
 
 
 class ALightSourceBase {
+  friend class APhysicObjectBase;
 protected:
   double mInt;
   AVector2 mPos;
   sf::Color mColor;
+  APhysicObjectBase* mBoundObj = 0;
 public:
   virtual void Illumine(double dt) = 0;
   ALightSourceBase(double intensity, const AVector2& position, const sf::Color& color);

@@ -39,7 +39,11 @@ class ASprite;
 class ALightSourceSFML : public ALightSourceBase {
   sf::RenderTexture* mShadow = 0;
   AVector2 mViewPos;
+
+  static sf::Sprite mLight;
+  static sf::Texture mLTex;
 public:
+  static void Init();
   ALightSourceSFML(double intensity, const AVector2& position, const sf::Color& color);
   void SetShadowTexture(sf::RenderTexture* shadow, const AVector2& pos);
   virtual void Illumine(double dt);
