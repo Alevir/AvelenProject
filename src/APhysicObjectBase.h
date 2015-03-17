@@ -30,6 +30,7 @@ typedef long long unsigned int UniqueID;
 #include "AObject.h"
 #include <set>
 #include <string>
+#include <map>
 
 #include "AVector2.h"
 
@@ -69,6 +70,7 @@ class APhysicObjectBase : public AObject{
   friend class ACharacterBase;
   double _freeContSpace;
 
+
 protected:
 
   void dropObject(double x, double y, double z = 0.0);
@@ -105,6 +107,7 @@ protected:
   ALightSourceBase* mLightSource = 0;
 
 public:
+
 
 
 

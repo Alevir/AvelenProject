@@ -26,6 +26,7 @@
 #include "AData.h"
 #include <libconfig.h++>
 #include "Box2D/Box2D.h"
+#include "map"
 
 
 
@@ -97,6 +98,8 @@ struct APhysicObjectData : public AData {
   static std::string WeaponTypeName[];
   static std::string b2TypeName[];
 
+  static std::map<std::string, std::pair<int, int> > CollisionGroup;
+
 
 
   APhysicObjectData(libconfig::Setting& data);
@@ -131,6 +134,7 @@ struct APhysicObjectData : public AData {
   virtual void ToConfig(libconfig::Setting& s) const;
   DrawType drawType = DT_Sprite;
   double bottleVolume = 0.0;
+  std::string collGroup;
 };
 
 #endif // APHYSICOBJECTDATA_H

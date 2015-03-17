@@ -81,6 +81,7 @@ class AWorldSFML : public AWorldBase {
   sf::Texture lightTex;
   sf::Sprite light;
 public:
+  static void ParseColor(const char* str, sf::Color& color);
   void OneStepPause();
 
   sf::Sprite focusedShape;

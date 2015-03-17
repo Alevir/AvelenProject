@@ -40,34 +40,11 @@ AWorldSFML::AWorldSFML() : shadowRS(sf::BlendMultiply) {
   using namespace libconfig;
   Config cfg;
   cfg.readFile("test.cfg");
-  dayTime.a  = (int)cfg.lookup("a");
-  dayTime.r  = (int)cfg.lookup("r");
-  dayTime.g  = (int)cfg.lookup("g");
-  dayTime.b  = (int)cfg.lookup("b");
+  ParseColor((const char*)cfg.lookup("color"), dayTime);
 
 
   //light source texture gen
-  /*sf::Image im;
-  const int size = 256;
-  im.create(size, size, sf::Color(0,0,0,255));
-  double r;
-  double dist;
-  double linLim = 0.5;
-  double linLimitInt = (cos(atan((size/2 * linLim /3 / Game::LightQuality))));
 
-  for(int i = 0; i < size; ++i) {
-    for(int j = 0; j < size; ++j) {
-      dist = sqrt((i - size/2) * (i - size/2) + (j - size/2) * (j - size/2));
-      if(dist > double(size/2 - 1)) continue;
-      if(dist < size/2 * linLim) {
-        r = 255 * (cos(atan((dist/3 / Game::LightQuality))));
-      } else {
-        r = 255 * linLimitInt * (1.0 - 2*(double(dist) / size * 2 - linLim));
-      }
-      im.setPixel(i, j, sf::Color(r,r,r,255));
-    }
-  }
-  im.saveToFile("light1.png");*/
 
   ALightSourceSFML::Init();
 
@@ -218,6 +195,28 @@ ALocationBase*AWorldSFML::newLocation(libconfig::Config& locationDesc, const Con
 return new ALocationSFML(locationDesc, this, la);
 }
 
+
+void AWorldSFML::ParseColor(const char* str, sf::Color& color) {
+  size_t l = strlen(str);
+  if(l != 8 && l != 6) throw std::logic_error("");
+  char s[3] = "00";
+  s[0] = str[0];
+  s[1] = str[1];
+  color.r = strtoul(s, 0, 16);
+  s[0] = str[2];
+  s[1] = str[3];
+  color.g = strtoul(s, 0, 16);
+  s[0] = str[4];
+  s[1] = str[5];
+  color.b = strtoul(s, 0, 16);
+
+  if(l == 8) {
+    s[0] = str[6];
+    s[1] = str[7];
+    color.a = strtoul(s, 0, 16);
+  }
+}
+
 void AWorldSFML::OneStepPause() {
   mGrPause = true;
   AWorldBase::OneStepPause();
@@ -334,10 +333,27 @@ sf::Sprite ALightSourceSFML::mLight;
 sf::Texture ALightSourceSFML::mLTex;
 
 void ALightSourceSFML::Init() {
-  std::string path("light");
-  path.push_back('0' + Game::LightQuality);
-  path.append(".png");
-  mLTex.loadFromFile(path);
+  sf::Image im;
+  const int size = 256 * Game::LightQuality;
+  im.create(size, size, sf::Color(0,0,0,255));
+  double r;
+  double dist;
+  double linLim = 0.5;
+  double linLimitInt = (cos(atan((size/2 * linLim /3 / Game::LightQuality))));
+
+  for(int i = 0; i < size; ++i) {
+    for(int j = 0; j < size; ++j) {
+      dist = sqrt((i - size/2) * (i - size/2) + (j - size/2) * (j - size/2));
+      if(dist > double(size/2 - 1)) continue;
+      if(dist < size/2 * linLim) {
+        r = 255 * (cos(atan((dist/3 / Game::LightQuality))));
+      } else {
+        r = 255 * linLimitInt * (1.0 - 2*(double(dist) / size * 2 - linLim));
+      }
+      im.setPixel(i, j, sf::Color(r,r,r,255));
+    }
+  }
+  mLTex.loadFromImage(im);
   mLight.setTexture(mLTex);
   mLight.setOrigin(mLight.getTextureRect().width / 2, mLight.getTextureRect().height / 2);
 }

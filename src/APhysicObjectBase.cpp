@@ -31,6 +31,9 @@
 #include "ALocationBase.h"
 #include "Global.h"
 
+
+
+
 std::string APhysicObjectBase::ScriptNodeNames[] = {
   "SN_View",
   "SN_Pick"
@@ -83,6 +86,9 @@ APhysicObjectBase::APhysicObjectBase(const APhysicObjectData *data, ALocationBas
     }
     fix_def.density = templateData.density;
     fix_def.friction = templateData.friction;
+    auto cg = APhysicObjectData::CollisionGroup[data->collGroup];
+    fix_def.filter.categoryBits = cg.first;
+    fix_def.filter.maskBits = cg.second;
     body->CreateFixture(&fix_def);
     delete fix_def.shape;
     body->SetUserData(this);
@@ -90,6 +96,7 @@ APhysicObjectBase::APhysicObjectBase(const APhysicObjectData *data, ALocationBas
     body->GetMassData(&md);
     md.mass = weight;
     body->SetMassData(&md);
+
   }
 
 
@@ -185,6 +192,9 @@ void APhysicObjectBase::RestoreBody(double iX, double iY, double iAngle, double 
   fix_def.shape = &shape;
   fix_def.density = templateData.density;
   fix_def.friction = templateData.friction;
+  auto cg = APhysicObjectData::CollisionGroup[templateData.collGroup];
+  fix_def.filter.categoryBits = cg.first;
+  fix_def.filter.maskBits = cg.second;
   body->CreateFixture(&fix_def);
   body->SetUserData(this);
   b2MassData md;
@@ -320,7 +330,12 @@ APhysicObjectBase* APhysicObjectBase::DropObjectFromContainer(APhysicObjectBase*
   }
   container.erase(it);
   _freeContSpace += obj->GetVolume();
-  obj->RestoreBody(GetX() + distX, GetY() + distY, GetAngle(), GetZ());
+  static std::map<std::string, double> hmap {
+    {"creature", 2.0},
+    {"high_object", 1.0},
+    {"low_object", 0.5}
+  };
+  obj->RestoreBody(GetX() + distX, GetY() + distY, GetAngle(), hmap[obj->GetTemplateData()->collGroup]);
   ChangeMass(-obj->weight);
 
   obj->world->SetVisible(obj);

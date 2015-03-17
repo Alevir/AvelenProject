@@ -72,6 +72,13 @@ std::string APhysicObjectData::WeaponTypeName[] = {
   "NotWeapon"
 };
 
+std::map<std::string, std::pair<int, int> > APhysicObjectData::CollisionGroup {
+  {"creature", {0x0001, 0x0005} },
+  {"low_object", {0x0002, 0x0006} },
+  {"high_object", {0x0004, 0x0007} }
+};
+
+
 
 APhysicObjectData::APhysicObjectData(libconfig::Setting &data) : Material(Game::LoadedMaterials[(const char*)data["material"]]) {
   templateName = (const char*)data["name"];
@@ -145,8 +152,7 @@ APhysicObjectData::APhysicObjectData(libconfig::Setting &data) : Material(Game::
     }
   }
   data.lookupValue("contCapacity", containerCapacity);
-
-
+  collGroup = (const char*)data["collGroup"];
 
 }
 
@@ -192,5 +198,7 @@ void APhysicObjectData::ToConfig(libconfig::Setting &s) const {
   s.add("externalVolume", Setting::TypeFloat) = externalVolume;
   s.add("contCapacity", Setting::TypeFloat) = containerCapacity;
   s.add("sprite", Setting::TypeString) = sprite;
+  s.add("collGroup", Setting::TypeString) = collGroup;
+
 
 }
