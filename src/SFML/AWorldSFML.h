@@ -64,6 +64,7 @@ public:
 
 class AWorldSFML : public AWorldBase {
   friend class ALocationSFML;
+  friend class APhysicObjectSFML;
   std::multimap<double, APhysicObjectSFML*> drawContainer;
   virtual void _graphicStep(double dt);
   APhysicObjectSFML* CreateObject(std::string iTemplateName, ALocationBase* loc, const ObjectInitArgs& args);
@@ -80,6 +81,17 @@ class AWorldSFML : public AWorldBase {
   sf::Sprite rs;
   sf::Texture lightTex;
   sf::Sprite light;
+
+
+  struct drawData {
+    drawData(ASprite* spr, double x, double y, double a) : Spr(spr), X(x), Y(y), A(a) {}
+    ASprite* Spr;
+    double X;
+    double Y;
+    double A;
+  };
+
+  std::list<drawData> mPreparedSprites;
 public:
   static void ParseColor(const char* str, sf::Color& color);
   void OneStepPause();

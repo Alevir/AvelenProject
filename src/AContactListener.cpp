@@ -30,7 +30,7 @@
 
 void AContactListener::BeginContact(b2Contact *contact) {
   double rest = (contact->GetFixtureA()->GetBody()->GetLinearVelocity() - contact->GetFixtureB()->GetBody()->GetLinearVelocity()).Length();
-  dout << rest; dout << '\n';
+  //dout << rest; dout << '\n';
   if(rest < 4.0) {
     rest *= 100.0 / 4.0;
     s.setVolume(rest);

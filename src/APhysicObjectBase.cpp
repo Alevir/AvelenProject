@@ -154,7 +154,8 @@ void APhysicObjectBase::TakeObjectFromWorld() {
 
 void APhysicObjectBase::SetLabel(const std::string& l) {
   mLabelNTr = l;
-  mLabel = Game::ObjectLabels->GetTranslation(l);
+  Game::Translations->SetFile("objectLabels");
+  mLabel = Game::Translations->GetTranslation(l);
 }
 
 void APhysicObjectBase::dropObject(double x, double y, double z) {

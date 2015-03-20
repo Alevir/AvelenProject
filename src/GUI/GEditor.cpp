@@ -155,9 +155,10 @@ GObjectInfoWindow::GObjectInfoWindow(GInfoManager<APhysicObjectBase, GObjectInfo
   const int valLenght = 340;
   int p = 0;
   //_window->bindCallback(&GObjectInfoWindow::_onClose, this, tgui::ChildWindow::Closed);
-
-  ATranslationReader rd(Game::TranslationsPath + Game::Language + "/common");
-  ATranslationReader objNames(Game::TranslationsPath + Game::Language + "/objectNames");
+  ATranslationReader& transl = *Game::Translations;
+  transl.SetFile("common");
+  //ATranslationReader rd(Game::TranslationsPath + Game::Language + "/common");
+  //ATranslationReader objNames(Game::TranslationsPath + Game::Language + "/objectNames");
   /*lTemplateName->load(paths::GuiConfFileName);
   vTemplateName->load(paths::GuiConfFileName);
   lObjectType->load(paths::GuiConfFileName);
@@ -173,7 +174,7 @@ GObjectInfoWindow::GObjectInfoWindow(GInfoManager<APhysicObjectBase, GObjectInfo
   lObjectType->setText("Type");
   lObjectType->setSize(labelLenght, labelHeight);
   lObjectType->setPosition(initPosX, initPosY + p * (labelHeight + vertIndent));
-  vObjectType->setText(rd.GetTranslation(APhysicObjectData::ObjectTypeName[_obj->GetTemplateData()->objectType]));
+  vObjectType->setText(transl.GetTranslation(APhysicObjectData::ObjectTypeName[_obj->GetTemplateData()->objectType]));
   vObjectType->setSize(valLenght, labelHeight);
   vObjectType->setPosition(initPosX + labelLenght + horIndent, initPosY + p * (labelHeight + vertIndent));
   p++;
@@ -182,10 +183,10 @@ GObjectInfoWindow::GObjectInfoWindow(GInfoManager<APhysicObjectBase, GObjectInfo
   || _obj->GetTemplateData()->objectType == APhysicObjectData::OT_Weapon) {
     if(_obj->GetTemplateData()->objectType == APhysicObjectData::OT_Armor) {
       lObjectSubType->setText("Armor Type");
-      vObjectSubType->setText(rd.GetTranslation(APhysicObjectData::ArmorTypeName[_obj->GetTemplateData()->armorType]));
+      vObjectSubType->setText(transl.GetTranslation(APhysicObjectData::ArmorTypeName[_obj->GetTemplateData()->armorType]));
     } else {
       lObjectSubType->setText("Weapon Type");
-      vObjectSubType->setText(rd.GetTranslation(APhysicObjectData::WeaponTypeName[_obj->GetTemplateData()->weaponType]));
+      vObjectSubType->setText(transl.GetTranslation(APhysicObjectData::WeaponTypeName[_obj->GetTemplateData()->weaponType]));
     }
     lObjectSubType->setSize(labelLenght, labelHeight);
     lObjectSubType->setPosition(initPosX, initPosY + p * (labelHeight + vertIndent));

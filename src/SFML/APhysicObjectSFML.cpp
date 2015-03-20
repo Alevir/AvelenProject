@@ -47,6 +47,7 @@ APhysicObjectSFML::APhysicObjectSFML(const APhysicObjectData* data, ALocationSFM
     mExtraCoord[1] = body->GetPosition().y;
     mExtraCoord[2] = body->GetAngle();
   }
+
 }
 
 
@@ -106,6 +107,7 @@ void APhysicObjectSFML::Display(double dt) {
     spr = scheme->Step(dt);
   }
 
+  spr->SetShadowWidth(10);
   spr->setPosition(mExtraCoord[x] * PIXELS_IN_METER, - mExtraCoord[y] * PIXELS_IN_METER);
   spr->setRotation( -mExtraCoord[a]);
 
@@ -141,7 +143,14 @@ void APhysicObjectSFML::Display(double dt) {
     flickering = false;
     sfmlWorld->focused = true;
   }
-  Game::Window->draw(*spr);
+  //sf::Color cc = sf::Color::White - sfmlWorld->dayTime;
+  sf::Color cc = sf::Color::Black;
+  cc.a = (sfmlWorld->dayTime.r/6 + sfmlWorld->dayTime.g/6 + sfmlWorld->dayTime.b/6) + 128;
+  spr->SetShadowColor(cc);
+  Game::Window->draw(spr->GetShadow());
+  //Game::Window->draw(*spr);
+  sfmlWorld->mPreparedSprites.push_back(AWorldSFML::drawData(spr,
+    mExtraCoord[x] * PIXELS_IN_METER, - mExtraCoord[y] * PIXELS_IN_METER, -mExtraCoord[a]));
 
 
 }

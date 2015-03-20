@@ -61,7 +61,8 @@ void AScriptWrapper::AddEffect(unsigned int id, const std::string& effectName, d
 }
 
 AScriptWrapper::AScriptWrapper(AWorldBase* world)
-: mWorld(world), mTrans(Game::TranslationsPath + Game::Language + "/scriptMessages") {
+: mWorld(world), mTrans(Game::TranslationsPath + Game::Language + "/") {
+  mTrans.SetFile("scriptMessages");
   mTrans.AddErrorString = false;
   ScrExec.add(fun(&AScriptWrapper::getPlayer), "GetPlayer");
   ScrExec.add(fun(&AScriptWrapper::ApplyLinearImpulse, this), "ApplyLinearImpulse");

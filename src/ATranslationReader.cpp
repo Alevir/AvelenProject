@@ -27,9 +27,22 @@
 #include <fstream>
 #include <locale>
 #include <sstream>
+#include "Common/Global.h"
 using namespace std;
-void ATranslationReader::_parseFile(std::wifstream& inFile) {
-  wstringstream file;
+
+
+
+ATranslationReader::ATranslationReader(const string& path) : Path(path){
+
+}
+
+void ATranslationReader::SetFile(const std::string &fileName) {
+  if((mCur = mLoadedFiles.find(fileName)) != mLoadedFiles.end()) return;
+  std::wifstream inFile;
+  inFile.open(Path + fileName);
+  mLoadedFiles[fileName];
+  mCur = mLoadedFiles.find(fileName);
+  std::wstringstream file;
   std::locale loc("");
   file.imbue(loc);
   inFile.imbue(loc);
@@ -60,7 +73,7 @@ void ATranslationReader::_parseFile(std::wifstream& inFile) {
       if(file.eof()) {
         for(int i = 0; i < mark.size(); ++i) {
           if(mark[i] != L'\n' && mark[i] != L' ') {
-            throw std::logic_error(std::string("translation file ") + _fileName + " has wrong format");
+            throw std::logic_error(std::string("translation file ") + fileName + " has a wrong format");
           }
         }
         mark = L"";
@@ -77,35 +90,20 @@ void ATranslationReader::_parseFile(std::wifstream& inFile) {
     }
     while(c != L'}') {
       file.get(c);
-      if(file.eof()) throw std::logic_error(std::string("translation file ") + _fileName + " has wrong format");
+      if(file.eof()) throw std::logic_error(std::string("translation file ") + fileName + " has wrong format");
       if(c != L'}')
         value.push_back(c);
 
     }
 
-    _elems.insert(std::make_pair(mark, value));
+    mCur->second.insert(std::make_pair(mark, value));
   }
-}
-
-ATranslationReader::ATranslationReader(const std::string &fileName) {
-  std::wifstream file;
-  _fileName = fileName;
-  file.open(fileName);
-  _parseFile(file);
-  file.close();
-}
-
-void ATranslationReader::SetFile(const std::string &fileName) {
-  _elems.clear();
-  std::wifstream file;
-  _fileName = fileName;
-  file.open(fileName);
-  file.close();
+  inFile.close();
 }
 
 std::wstring ATranslationReader::GetTranslation(const std::wstring &mark) {
-  auto it = _elems.begin();
-  if((it = _elems.find(mark)) == _elems.end()) {
+  auto it = mCur->second.begin();
+  if((it = mCur->second.find(mark)) == mCur->second.end()) {
     if(AddErrorString) {
       return mark + L" (no translation)";
     } else {

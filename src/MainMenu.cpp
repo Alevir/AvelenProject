@@ -37,7 +37,8 @@ MainMenu::MainMenu()
   int ButtonHeight = 70;
   debug.Switch();
 
-  ATranslationReader tr(Game::TranslationsPath + Game::Language + "/mainMenu");
+  ATranslationReader& tr = *(Game::Translations);
+  tr.SetFile("mainMenu");
   dout << tr.GetTranslation(L"sp");
 
 	bSinglePlayer->load(Game::GuiConfFileName);

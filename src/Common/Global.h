@@ -56,6 +56,10 @@ void LoadPaths(T& cont, const std::string& pathsFile) {
 
 
 //std::string& operator+ (const char* str0, const std::string& str1);
+enum class Translations : size_t{
+  ObjectLabels = 0,
+  Common
+};
 
 
 
@@ -81,7 +85,7 @@ public:
   static AObjectTemplatesContainer<AAnimationScheme>* AnimationSchemes;
   static AObjectTemplatesContainer<APotionRecipe>* PotionRecipes;
   static AObjectTemplatesContainer<AExtractionRecipe>* ExtractionRecipes;
-  static ATranslationReader* ObjectLabels;
+  static ATranslationReader* Translations;
   static sf::Vector2u LocLoadNum; // defines number of loaded locations near the current location
 
 

@@ -27,15 +27,16 @@
 #include <fstream>
 #include <wchar.h>
 #include <map>
-
+typedef std::map<std::wstring, std::wstring> _dict;
 
 class ATranslationReader {
-  std::map<std::wstring, std::wstring> _elems;
-  std::string _fileName;
-  void _parseFile(std::wifstream& file);
+  std::map<std::string, _dict> mLoadedFiles;
+  std::map<std::string, _dict>::iterator mCur;
+
 public:
+  const std::string Path;
   bool AddErrorString = true;
-  ATranslationReader(const std::string& fileName);
+  ATranslationReader(const std::string& path);
   void SetFile(const std::string& fileName);
   std::wstring GetTranslation(const std::wstring& mark);
   std::wstring GetTranslation(const std::string& mark);

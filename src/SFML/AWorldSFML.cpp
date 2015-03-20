@@ -36,6 +36,10 @@
 using namespace std;
 double sz;
 
+sf::Color operator / (const sf::Color& c, int i) {
+  return sf::Color(c.r/i, c.g/ i, c.b/i, c.a/i);
+}
+
 AWorldSFML::AWorldSFML() : shadowRS(sf::BlendMultiply) {
   using namespace libconfig;
   Config cfg;
@@ -58,22 +62,9 @@ AWorldSFML::AWorldSFML() : shadowRS(sf::BlendMultiply) {
 
 
 
-
   ASprite::RecountRenderBorders();
   sz = ASprite::renderRadius * 2 * PIXELS_IN_METER;
   shadowTex.create(sz, sz);
-  /*shadowTex.clear(dayTime);
-
-  lightTex.loadFromFile("light.png");
-  light.setTexture(lightTex);
-  light.setOrigin(lightTex.getSize().x / 2, lightTex.getSize().y / 2);
-  light.setPosition(sz/2, sz/2);
-  light.setColor(sf::Color::Cyan);
-  light.setScale(2.0, 2.0);
-  shadowTex.draw(light, sf::RenderStates(sf::BlendAdd));*/
- /* light.setPosition(sz/2, sz/2 - 3 * PIXELS_IN_METER);
-  light.setColor(sf::Color::Red);
-  shadowTex.draw(light, sf::RenderStates(sf::BlendAdd));*/
 
 }
 
@@ -123,6 +114,13 @@ void AWorldSFML::_graphicStep(double dt) {
   for(std::pair<double, APhysicObjectSFML*> p : drawContainer) {
     p.second->Display(dt);
   }
+
+  for(drawData sprd : mPreparedSprites) {
+    sprd.Spr->setPosition(sprd.X, sprd.Y);
+    sprd.Spr->setRotation(sprd.A);
+    Game::Window->draw(*(sprd.Spr));
+  }
+  mPreparedSprites.clear();
 
 
   shadowTex.clear(dayTime);

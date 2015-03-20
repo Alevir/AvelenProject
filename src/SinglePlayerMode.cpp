@@ -146,6 +146,9 @@ void SinglePlayerMode::_run() {
           } else
           if (event.key.code == sf::Keyboard::I) {
             control.Show(plInv);
+          } else
+          if (event.key.code == sf::Keyboard::C) {
+            control.Show(&Interface.Info);
           } else {
             control.HandleEvent(event);
           }

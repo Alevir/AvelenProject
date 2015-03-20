@@ -225,3 +225,13 @@ void GetAllFilenamesInDir(const char* dirPath, std::vector<std::string>& contain
 }
 
 #endif
+
+
+std::string toStr(double d, int p) {
+  std::string str = std::to_string(d);
+  if(str.length() < 4) return str;
+  for(size_t i = str.length() - p - 1; i >= 0 && str[i] !='.'; --i) {
+      str.pop_back();
+    }
+  return str;
+}

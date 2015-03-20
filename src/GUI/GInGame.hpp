@@ -21,12 +21,19 @@
 #define GINGAME_HPP
 #include "GUI/GCommon.h"
 #include "ACharacterBase.h"
+#include "ATranslationReader.h"
 
 
 class GCharacterInfo : public GuiWindowReusable {
+  tgui::TextBox::Ptr mInfoName;
+  tgui::TextBox::Ptr mInfoValue;
+  ACharacterBase* mChar;
+  ACharacterBase::Info mInfo;
 
 public:
-  GCharacterInfo(GGUI& gui);
+  GCharacterInfo(GGUI& gui, ACharacterBase* ch);
+  void Refresh();
+
 };
 
 
@@ -67,6 +74,7 @@ class GPlayerInterface {
   MessageBar mesBar;
 
 public:
+  GCharacterInfo Info;
   GPlayerInterface(ACharacterBase* player, GGUI& gui);
   void SetFocusedObject(APhysicObjectBase* obj);
   void Step(double dt);

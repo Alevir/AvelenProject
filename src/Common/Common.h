@@ -45,6 +45,7 @@ std::string ToCfgFormat(const std::string& str);
 void PackSave(const std::string& mapDir, const std::string& savePath);
 void UnpackSave(const std::string& savePath, const std::string& mapDir);
 
+std::string toStr(double d, int p = 2);
 
 void ClearDirectory(const char* dirPath);
 void GetAllFilenamesInDir(const char* dirPath, std::vector<std::string>& container);

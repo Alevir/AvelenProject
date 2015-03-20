@@ -40,7 +40,6 @@ class EffectData;*/
 typedef unsigned int uint;
 
 
-
 enum InventorySlot {
   IS_Head,
   IS_Body,
@@ -128,6 +127,22 @@ protected:
   double mStatePeriod = 1.0;
 
 public:
+
+  struct Info {
+    double Strength;
+    double Accuracy;
+    double Regen;
+    double HP;
+    double MaxHP;
+    double EP;
+    double MaxEP;
+    std::string Name;
+    std::string Race;
+
+  };
+
+  void GetInfo(Info& info);
+
   const std::map<std::string, Effect*>& GetEffects();
   void AddXP(double value);
   APhysicObjectBase* Slots[int(IS_LeftHand) + 1];

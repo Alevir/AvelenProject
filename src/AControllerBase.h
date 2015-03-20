@@ -35,8 +35,6 @@ class AControllerBase {
 
   bool mIdle = true;
   double (*method)(double);
-  int mDirSum;
-  int mDirCount;
   double mT = 0.0;
   double mDT = 1000000.0;
 protected:

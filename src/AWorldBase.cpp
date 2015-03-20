@@ -174,12 +174,7 @@ double AWorldBase::LogicStep() {
     if(physicTCD.timeCount > physicTCD.frameLength) {
       _logicStep(physicTCD.timeCount);
       physicTCD.timeCount = 0;
-      ++FPSCount;
-      if(FPSTimeCount > SECOND) {
-      FPSTimeCount -= SECOND;
-      std::cout << "LFPS: " << FPSCount << "\n";
-      FPSCount = 0;
-    }
+
     }
     return physicTCD.frameLength;
   } else {
@@ -196,6 +191,12 @@ void AWorldBase::GraphicStep() {
   if(graphicTCD.timeCount > graphicTCD.frameLength) {*/
 
     //_graphicStep(graphicTCD.timeCount);
+    ++FPSCount;
+      if(FPSTimeCount > SECOND) {
+      FPSTimeCount -= SECOND;
+      std::cout << "LFPS: " << FPSCount << "\n";
+      FPSCount = 0;
+    }
     _graphicStep(delta);
     //graphicTCD.timeCount = 0;
   //}

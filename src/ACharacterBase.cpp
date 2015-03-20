@@ -210,6 +210,18 @@ ACharacterBase::~ACharacterBase() {
 
 }
 
+void ACharacterBase::GetInfo(ACharacterBase::Info& info) {
+  info.Strength = mStr;
+  info.Accuracy = mAcc;
+  info.Regen = mReg;
+  info.HP = mHP;
+  info.MaxHP = mMaxHP;
+  info.EP = mEP;
+  info.MaxEP = mMaxEP;
+  info.Name = "unnamed";
+  info.Race = GetRace();
+}
+
 const std::map<std::string, Effect *> &ACharacterBase::GetEffects() {
   return mEffects;
 }

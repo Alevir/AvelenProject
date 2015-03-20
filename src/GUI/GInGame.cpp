@@ -26,7 +26,7 @@
 
 
 GPlayerInterface::GPlayerInterface(ACharacterBase *player, GGUI& gui)
-: mGui(gui), focusedOn(mGui.Gui), efBar(this), mesBar(this) {
+: mGui(gui), focusedOn(mGui.Gui), efBar(this), mesBar(this), Info(gui, player) {
   mPlayer = player;
   HPState.setPosition(Game::Window->getSize().x * 2.0 / 3.0 - 7, 5);
   EPState.setPosition(Game::Window->getSize().x * 2.0 / 3.0 - 7, 45);
@@ -160,7 +160,50 @@ void GPlayerInterface::MessageBar::Step(double dt) {
   }
 }
 
+GCharacterInfo::GCharacterInfo(GGUI& gui, ACharacterBase* ch) : GuiWindowReusable(gui), mChar(ch),
+    mInfoName(*mWindow),  mInfoValue(*mWindow)
+{
+  auto wSize = Game::Window->getSize();
+  const int indent = 5;
+  int nameL = wSize.x / 8;
+  int valueL = wSize.x / 4;
+  int height = wSize.y / 4;
+  mInfoName->setReadOnly(true);
+  mInfoValue->setReadOnly(true);
+  mInfoName->setTextColor(sf::Color::White);
+  mInfoValue->setTextColor(sf::Color::White);
+  mInfoName->setTextSize(25);
+  mInfoValue->setTextSize(25);
 
-GCharacterInfo::GCharacterInfo(GGUI& gui) : GuiWindowReusable(gui) {
+
+
+  mWindow->setSize(nameL + valueL + 3 * indent, height + 2*indent);
+  mInfoName->setPosition(indent, indent);
+  mInfoValue->setPosition(indent + nameL + indent, indent);
+  mInfoName->setSize(nameL, height);
+  mInfoValue->setSize(valueL, height);
+  Refresh();
+
+}
+
+
+
+void GCharacterInfo::Refresh() {
+  ATranslationReader& tr = *Game::Translations;
+  tr.SetFile("common");
+  mChar->GetInfo(mInfo);
+  mInfoName->setText("");
+  mInfoValue->setText("");
+  mInfoName->addText(mInfo.Name + "\n");
+  mInfoValue->addText(mInfo.Race + "\n");
+
+  mInfoName->addText(tr.GetTranslation(L"Str") + L": \n");
+  mInfoValue->addText(toStr(mInfo.Strength) + "\n");
+
+  mInfoName->addText(tr.GetTranslation(L"Acc") + L": \n");
+  mInfoValue->addText(toStr(mInfo.Accuracy) + "\n");
+
+  mInfoName->addText(tr.GetTranslation(L"Reg") + L": \n");
+  mInfoValue->addText(toStr(mInfo.Regen) + "\n");
 
 }

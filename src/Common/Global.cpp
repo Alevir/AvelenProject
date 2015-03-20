@@ -46,7 +46,8 @@ AAnimationContainer* Game::animContainer;
 AObjectTemplatesContainer<AAnimationScheme>* Game::AnimationSchemes;
 AObjectTemplatesContainer<APotionRecipe>* Game::PotionRecipes;
 AObjectTemplatesContainer<AExtractionRecipe>* Game::ExtractionRecipes;
-ATranslationReader* Game::ObjectLabels;
+
+ATranslationReader* Game::Translations;
 sf::Vector2u Game::LocLoadNum;
 int Game::LightQuality;
 
@@ -148,7 +149,7 @@ Game::Game() {
   ExtractionRecipes = new AObjectTemplatesContainer<AExtractionRecipe>("sources");
   ExtractionRecipes->AddContent("../resources/alchemy/extrations.cfg");
 
-  ObjectLabels = new ATranslationReader(TranslationsPath + Language + "/objectLabels");
+  Translations = new ATranslationReader(TranslationsPath + Language + "/");
 
 
 
@@ -169,7 +170,7 @@ Game::~Game() {
   delete AnimationSchemes;
   delete PotionRecipes;
   delete ExtractionRecipes;
-  delete ObjectLabels;
+  delete Translations;
 
   //ClearDirectory("../workspace/");
 

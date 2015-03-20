@@ -33,6 +33,9 @@ const double PIXELS_IN_METER = 100.0;
 class ASprite : public sf::Sprite {
   friend class ASpriteContainer;
   std::string name;
+  size_t mWidth = 0;
+  sf::Texture mShadowTex;
+  sf::Sprite mShadowSpr;
 
   ASprite(const ASpriteData* data, ATextureContainer *iTC);
 
@@ -43,9 +46,13 @@ public:
   static double cdx;
   static double cdy;
 
+  void SetShadowColor(const sf::Color& c);
+  const sf::Sprite& GetShadow() { return mShadowSpr; }
+  void SetShadowWidth(size_t w);
   static void RecountRenderBorders();
 
 
+  void setPosition(float x, float y);
   //Angle in radians
   void setRotation(double angle);
 
