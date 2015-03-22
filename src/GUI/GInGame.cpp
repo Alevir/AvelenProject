@@ -194,7 +194,11 @@ void GCharacterInfo::Refresh() {
   mChar->GetInfo(mInfo);
   mInfoName->setText("");
   mInfoValue->setText("");
-  mInfoName->addText(mInfo.Name + "\n");
+
+  mInfoName->addText(tr.GetTranslation(L"Name") + L": \n");
+  mInfoValue->addText(mInfo.Name + "\n");
+
+  mInfoName->addText(tr.GetTranslation(L"Race") + L": \n");
   mInfoValue->addText(mInfo.Race + "\n");
 
   mInfoName->addText(tr.GetTranslation(L"Str") + L": \n");

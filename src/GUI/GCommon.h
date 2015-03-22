@@ -61,10 +61,6 @@ public:
 };
 
 
-
-
-
-
 class GuiWindow : public GuiWindowBase {
 protected:
   AVector2 _initPos;
