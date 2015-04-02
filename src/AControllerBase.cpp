@@ -22,7 +22,7 @@
 */
 
 #include "AControllerBase.h"
-#include "ACharacterBase.h"
+#include "ACharacter.h"
 #include "AVector2.h"
 #include "Actions/CombatActions.h"
 #include "ACombatModelBase.h"
@@ -32,7 +32,7 @@ double sinp(double x) {
   return 0.6 * sin(0.21 * x) + 1.0;
 }
 
-AControllerBase::AControllerBase(ACharacterBase *iNPC) {
+AControllerBase::AControllerBase(ACharacter *iNPC) {
   character = iNPC;
   method = sinp;
 }
@@ -54,7 +54,7 @@ void AControllerBase::moveForward() {
     character->mCurMovState = MoveState::MoveForward;
   }
 
-  character->ApplyLinearImpulse(AVector2(0, 1 * mDT / 33333.0).Rotate(character->GetAngle()) *= factor/* * method(mT)*/);
+  character->ApplyLinearImpulse(AVector2(0, 1 * mDT / 33333.0).Rotate(character->GetTransform().A) *= factor/* * method(mT)*/);
 }
 
 
@@ -63,17 +63,17 @@ void AControllerBase::moveBack() {
   double factor = 10;
   character->mCurMovState = MoveState::MoveBack;
   mIdle = false;
-  character->ApplyLinearImpulse(AVector2(0, -1 * mDT / 33333.0).Rotate(character->GetAngle()) *= factor/* * method(mT)*/);
+  character->ApplyLinearImpulse(AVector2(0, -1 * mDT / 33333.0).Rotate(character->GetTransform().A) *= factor/* * method(mT)*/);
 }
 
 void AControllerBase::moveRight() {
   double factor = 10;
-  character->ApplyLinearImpulse(AVector2(-1 * mDT / 33333.0, 0).Rotate(character->GetAngle()) *= factor/* * method(mT)*/);
+  character->ApplyLinearImpulse(AVector2(-1 * mDT / 33333.0, 0).Rotate(character->GetTransform().A) *= factor/* * method(mT)*/);
 }
 
 void AControllerBase::MoveLeft() {
   double factor = 10;
-  character->ApplyLinearImpulse(AVector2(1 * mDT / 33333.0, 0).Rotate(character->GetAngle()) *= factor /** method(mT)*/);
+  character->ApplyLinearImpulse(AVector2(1 * mDT / 33333.0, 0).Rotate(character->GetTransform().A) *= factor /** method(mT)*/);
 }
 
 

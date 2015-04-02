@@ -21,7 +21,7 @@
 #define EFFECTS_HPP
 #include "Action.h"
 #include <libconfig.h++>
-class ACharacterBase;
+class ACharacter;
 
 
 struct EffectData {
@@ -38,13 +38,13 @@ struct EffectData {
 
 class Effect : public IAction {
 protected:
-  ACharacterBase* _ch;
+  ACharacter* _ch;
 public:
-  static Effect* CreateEffect(const EffectData& ed, ACharacterBase* ch);
+  static Effect* CreateEffect(const EffectData& ed, ACharacter* ch);
   virtual bool Add(const EffectData& ed) = 0;
   //virtual operator EffectData() = 0;
   const std::string EffectName;
-  Effect( const std::string& effectName, ACharacterBase* ch);
+  Effect( const std::string& effectName, ACharacter* ch);
   virtual void Write(libconfig::Setting& group) = 0;
   virtual ~Effect() {}
   //virtual operator EffectData();
@@ -55,14 +55,14 @@ class DisposableEffect : public DisposableAction, public Effect {
 public:
   double& GetDuration() { return Action::GetDuration(); }
   void Step(double dt);
-  DisposableEffect(double mDuration, const std::string& effectName, ACharacterBase* ch);
+  DisposableEffect(double mDuration, const std::string& effectName, ACharacter* ch);
 };
 
 class RepeatingEffect : public RepeatingAction, public Effect  {
 public:
   double& GetDuration() { return Action::GetDuration(); }
   void Step(double dt) { RepeatingAction::Step(dt); }
-  RepeatingEffect(double mDuration, double period, const std::string& effectName, ACharacterBase* ch);
+  RepeatingEffect(double mDuration, double period, const std::string& effectName, ACharacter* ch);
 
 };
 
@@ -74,7 +74,7 @@ public:
   void Write(libconfig::Setting& group);
   bool Add(const EffectData &ed);
   EfRepValueChange(double mDuration, double period, const std::string& effectName,
-              ACharacterBase* ch, double &changedValue, double measure);
+              ACharacter* ch, double &changedValue, double measure);
   //operator EffectData();
 };
 

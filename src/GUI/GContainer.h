@@ -30,7 +30,7 @@
 #include "GCommon.h"
 
 class GContainerSystem;
-class ACharacterBase;
+class ACharacter;
 class APhysicObjectBase;
 
 class GContainer : public GuiWindowBase {

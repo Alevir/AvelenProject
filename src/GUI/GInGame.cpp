@@ -19,13 +19,13 @@
 #include "GInGame.hpp"
 #include "AHumanCombatModel.h"
 #include "Character/Effects.hpp"
-#include "ACharacterBase.h"
+#include "ACharacter.h"
 #include "Global.h"
 
 
 
 
-GPlayerInterface::GPlayerInterface(ACharacterBase *player, GGUI& gui)
+GPlayerInterface::GPlayerInterface(ACharacter *player, GGUI& gui)
 : mGui(gui), focusedOn(mGui.Gui), efBar(this), mesBar(this), Info(gui, player) {
   mPlayer = player;
   HPState.setPosition(Game::Window->getSize().x * 2.0 / 3.0 - 7, 5);
@@ -84,7 +84,7 @@ void GPlayerInterface::Draw() {
 
   const AHumanCombatModel* cm;
   sf::Color col;
-  if( cm = dynamic_cast<const AHumanCombatModel*>(mPlayer->GetCombatModel())) {
+  if( (cm = dynamic_cast<const AHumanCombatModel*>(mPlayer->GetCombatModel()))) {
     for(int i = 0; i < 3; i++) {
       col = sf::Color::Yellow;
       col.a = 120;
@@ -160,7 +160,7 @@ void GPlayerInterface::MessageBar::Step(double dt) {
   }
 }
 
-GCharacterInfo::GCharacterInfo(GGUI& gui, ACharacterBase* ch) : GuiWindowReusable(gui), mChar(ch),
+GCharacterInfo::GCharacterInfo(GGUI& gui, ACharacter* ch) : GuiWindowReusable(gui), mChar(ch),
     mInfoName(*mWindow),  mInfoValue(*mWindow)
 {
   auto wSize = Game::Window->getSize();

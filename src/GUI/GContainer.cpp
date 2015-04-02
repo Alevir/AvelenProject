@@ -26,7 +26,7 @@
 #include "GCommon.h"
 #include "Mode.h"
 #include "ADebugOutput.h"
-#include "ACharacterBase.h"
+#include "ACharacter.h"
 #include "GInventory.h"
 
 void GContainer::_onClose() {
@@ -97,10 +97,10 @@ if(mWindow->isVisible()) {
 }
 
 void GContainer::Refresh() {
-objList->removeAllItems();
-_content.clear();
-totalWeight = 0.0;
-for(APhysicObjectBase* o : _obj->container) {
+  objList->removeAllItems();
+  _content.clear();
+  totalWeight = 0.0;
+for(APhysicObjectBase* o : _obj->GetContainedObjects()) {
     objList->addItem(o->GetTemplateName());
     _content.push_back(o);
     totalWeight += o->GetWeight();

@@ -38,26 +38,37 @@ typedef long long unsigned int UniqueID;
 class AContactListener;
 class AWorldBase;
 class ALocationBase;
-class ACharacterBase;
+class ACharacter;
 class ACombatModelBase;
 class Effect;
 class EffectData;
 #include "APhysicObjectData.h"
 #include "Box2D/Box2D.h"
+#include "AObjectDrawer.hpp"
 #include <limits>
+
+
+struct ATransform {
+  ATransform(double x, double y, double a) : X(x), Y(y), A(a) {}
+  ATransform(const AVector2& v) : X(v.x), Y(v.y), A(0.0) {}
+  ATransform() : X(0.0), Y(0.0), A(0.0) {}
+  double X;
+  double Y;
+  double A;
+  ATransform& operator += (const ATransform& tr);
+};
 
 
 struct ObjectInitArgs {
   bool Coords = false;
   long int ID = -1;
+  ATransform Tr;
   UniqueID UnID;
-  double x;
-  double y;
-  double z = 0;
-  double angle;
+  double Z = 0;
   ObjectInitArgs() {
     UnID = std::numeric_limits<UniqueID>::max();
   }
+  bool IsCharacter = false;
 };
 
 class ALightSourceBase;
@@ -67,53 +78,70 @@ class APhysicObjectBase : public AObject{
   friend class ACombatModelBase;
   friend class AWorldBase;
   friend class AContactListener;
-  friend class ACharacterBase;
-  double _freeContSpace;
+  double mFreeContSpace;
 
-
+  //APhysicObjectBase(const APhysicObjectBase& obj) {}
 protected:
 
-  void dropObject(double x, double y, double z = 0.0);
+  void dropObject(APhysicObjectBase* obj, const ATransform& t, double z = 0.0);
 
-  AWorldBase* world;
-  bool wasChanged = true;
+
+  bool mWasChanged = true;
 
   virtual ~APhysicObjectBase();
   void SetDamping(double);
   void ChangeMass(double deltaMass);
-  APhysicObjectBase* containingObject = 0;
-  void RestoreBody(double iX, double iY, double iAngle, double iZ);
-  b2Body* body = 0;
-  double weight;
-  unsigned int ID;
-  UniqueID uniqueID;
-  double z;
-  double MaxHitPoints;
-  double HitPoints;
-  double Protection;  // for armor
-  double Sharpness = 0.5;   // for weapon
-  std::vector<EffectData> mStoredEffects; //for potion
+
+  void RestoreBody(APhysicObjectBase* obj, ATransform t, double z);
+
+  double mWeight;
+  unsigned int mID;
+  UniqueID mUniqueID;
+  double mZ;
+  double mMaxHitPoints;
+
 
   ALocationBase* mLoc;
 
   virtual void Destroy();
-  APhysicObjectData templateData;
-  void TakeObjectFromWorld();
+
   std::vector<std::string> mScripts;
   std::wstring mLabel;
   std::string mLabelNTr;
-  APhysicObjectBase(const APhysicObjectData* data, ALocationBase* loc, const ObjectInitArgs& args);
+  APhysicObjectBase(const APhysicObjectData& data, ALocationBase* loc, const ObjectInitArgs& args);
 
   ALightSourceBase* mLightSource = 0;
 
+  AObjectDrawer* mDrawer = 0;
+  std::set<APhysicObjectBase*> mContainer;
+
+  static std::map<std::string, double> sHMap;
+  //bool visible = false;
 public:
 
+  double mHitPoints;
+  double mProtection;  // for armor
+  double mSharpness = 0.5;   // for weapon
+  std::vector<EffectData> mStoredEffects; //for potion
+  b2Body* mBody = 0;
+  AWorldBase* mWorld;
+
+  APhysicObjectData mTemplateData;
+  virtual void TakeObjectFromWorld();
+
+  const std::set<APhysicObjectBase*> GetContainedObjects() const;
+
+  void Display(double dt);
+  void Extrapolate(double dt);
+
+  //bool WasChanged();  //for extrapolation
+  APhysicObjectBase* mContainingObject = 0;
 
 
-
+  AWorldBase* GetWorld() { return mWorld; }
   void SetLabel(const std::string& l);
-  std::wstring GetLabel() { return mLabel; }
-  std::string GetNotTranslatedLabel() { return mLabelNTr; }
+  std::wstring GetLabel() const { return mLabel; }
+  std::string GetNotTranslatedLabel() const { return mLabelNTr; }
 
   enum ScriptNode {
     SN_View = 0,
@@ -132,35 +160,38 @@ public:
   };
 
   const APhysicObjectData* GetTemplateData() {
-    return &templateData;
+    return &mTemplateData;
   }
-  std::string GetTemplateName() { return templateData.templateName; }
-
-  std::set<APhysicObjectBase*> container;
+  std::string GetTemplateName() const { return mTemplateData.templateName; }
 
 
-  bool SetPosition(const AVector2& pos);
+
+
+  bool SetTransform(const ATransform& tr);
 
 
   //APhysicObjectBase(const APhysicObjectData &templateData, AWorldBase* iWorld, unsigned int ID);
   void Step(double dt);
 
-  unsigned int GetID() { return ID; }
-  unsigned int GetScriptID() { return uniqueID; }
-  double GetHitPoints() { return HitPoints; }
-  double GetMaxHitPoints() { return MaxHitPoints; }
+  unsigned int GetID() { return mID; }
+  unsigned int GetScriptID() { return mUniqueID; }
+  double GetHitPoints() { return mHitPoints; }
+  double GetMaxHitPoints() { return mMaxHitPoints; }
 
   double GetSharpness();
   double GetVelocityModulus();
   double GetProtection();
-  double GetX();
-  double GetY();
+
   double GetZ();
-  double GetAngle();
-  double GetWeight();
-  double GetVolume();
+  void GetTransform(ATransform& tr) const;
+  ATransform GetTransform();
+  void GetTransformExtr(ATransform& tr);  //extrapolated
   AVector2 GetPosition();
-  APhysicObjectBase* GetContainingObject() { return containingObject; }
+
+  void GetVelocity(ATransform& tr) const;
+  double GetWeight() const;
+  double GetVolume() const;
+  APhysicObjectBase* GetContainingObject() { return mContainingObject; }
 
   void ApplyLinearImpulse(double x, double y);
   void ApplyAngularImpulse(double w);
@@ -175,22 +206,23 @@ public:
 
 
   //container
-  double GetFreeSpace() {
-    return _freeContSpace;
+  double GetFreeSpace() const {
+    return mFreeContSpace;
   }
 
   void AddObjectToContainer(APhysicObjectBase* obj);
   APhysicObjectBase* GetObjectFromContainer(APhysicObjectBase* obj); // without creating new physic body
-  APhysicObjectBase* DropObjectFromContainer(APhysicObjectBase* obj, double distX, double distY); //creates physic body
+  APhysicObjectBase* DropObjectFromContainer(APhysicObjectBase* obj, const ATransform& shift); //creates physic body
   void TransferObject(APhysicObjectBase* targetContainer, APhysicObjectBase* object);
 
 
   void SetScript(ScriptNode sn, const std::string& scr);
   void ExecuteScript(ScriptNode sn, APhysicObjectBase* triggeringObj);
-  const std::vector<std::string>& GetScripts();
+  const std::vector<std::string>& GetScripts() const;
 
 
 
+  bool CheckForChanges();
 };
 
 #endif // APHYSICOBJECT_H

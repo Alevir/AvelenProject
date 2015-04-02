@@ -25,20 +25,20 @@
 #define COMBATACTIONS_H
 #include "Box2D/Box2D.h"
 #include "Action.h"
-#include "ACharacterBase.h"
+#include "ACharacter.h"
 #include "const.h"
 #include "Common.h"
 #include <iostream>
 
 class AHumanCombatModel;
 
-class ACharacterBase;
+class ACharacter;
 
 class AttackAction
     : public DisposableAction {
 protected:
   HitPosition pos;
-  ACharacterBase* character;
+  ACharacter* character;
 
   class RayCastCallback
       : public b2RayCastCallback {
@@ -52,7 +52,7 @@ protected:
   bool process(b2Fixture* fixture);
 
 public:
-  AttackAction(double delay, ACharacterBase* iCharacter, HitPosition pos);
+  AttackAction(double delay, ACharacter* iCharacter, HitPosition pos);
   virtual void Activate();
   virtual ~AttackAction() {}
 };

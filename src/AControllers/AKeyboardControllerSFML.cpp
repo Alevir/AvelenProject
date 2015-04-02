@@ -28,7 +28,7 @@
 #include "CombatModels/AHumanCombatModel.h"
 #include "Global.h"
 
-AKeyboardControllerSFML::AKeyboardControllerSFML(ACharacterBase *iNPC) : AControllerBase(iNPC) {
+AKeyboardControllerSFML::AKeyboardControllerSFML(ACharacter *iNPC) : AControllerBase(iNPC) {
 
 }
 
@@ -43,7 +43,7 @@ MovementAction* AKeyboardControllerSFML::mActions[] = {
 };*/
 
 void AKeyboardControllerSFML::subStep(double dt) {
-  if(!_enabled) return;
+  if(!mEnabled) return;
   double MouseClickRelaxTime = SECOND / 4.0;
   double KeyRelaxTime = SECOND / 4.0;
   static double t = 0;

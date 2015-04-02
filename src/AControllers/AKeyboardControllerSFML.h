@@ -33,18 +33,17 @@
 class AKeyboardControllerSFML
     : public AControllerBase {
 
-  std::queue<sf::Event> events;
-  bool _enabled = false;
+  bool mEnabled = false;
   void subStep(double dt);
 
 public:
-  AKeyboardControllerSFML(ACharacterBase* iNPC);
+  AKeyboardControllerSFML(ACharacter* iNPC);
   bool Switch() {
-    return _enabled = !_enabled;
+    return mEnabled = !mEnabled;
   }
 
-  bool IsEnabled() { return _enabled; }
-  void SetEnabled(bool v) { _enabled = v; }
+  bool IsEnabled() { return mEnabled; }
+  void SetEnabled(bool v) { mEnabled = v; }
 
   unsigned int GetType() const { return static_cast<unsigned int>(Controllers::KeyboardController); }
 

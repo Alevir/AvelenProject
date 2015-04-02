@@ -64,20 +64,22 @@ if(!_used) {
 void GEditorContainerSystem::_checkAndDrop() {
   if(sourceStatus == ContainerSource) {
     auto v = AWorldSFML::ConvertMouseCurrentPos();
-    v.x -= contSource->_obj->GetX();
-    v.y -= contSource->_obj->GetY();
-    contSource->_obj->DropObjectFromContainer(trObj, v.x, v.y);
+    ATransform tr; contSource->_obj->GetTransform(tr);
+    v.x -= tr.X;
+    v.y -= tr.Y;
+    contSource->_obj->DropObjectFromContainer(trObj, v);
     contSource->Refresh();
     sourceStatus = NoSource;
     return;
   }
   if(sourceStatus == InventorySource) {
     auto v = AWorldSFML::ConvertMouseCurrentPos();
-    v.x -= invSource->GetCharacter()->GetX();
-    v.y -= invSource->GetCharacter()->GetY();
+    ATransform tr; invSource->GetCharacter()->GetTransform(tr);
+    v.x -= tr.X;
+    v.y -= tr.Y;
     APhysicObjectBase* obj = invSource->GetCharacter()->GetSlot(getSourceSlot());
     invSource->GetCharacter()->DropSlot(getSourceSlot());
-    obj->SetPosition(v);
+    obj->SetTransform(v);
     invSource->Refresh();
     sourceStatus = NoSource;
     return;
@@ -86,15 +88,15 @@ void GEditorContainerSystem::_checkAndDrop() {
 
 void GInGameContainerSystem::_checkAndDrop() {
   if(!mPLI) return;
-  ACharacterBase* mPlayer = mPLI->GetCharacter();
+  ACharacter* mPlayer = mPLI->GetCharacter();
   if(sourceStatus == ContainerSource) {
     if(contSource->_obj->GetPosition().GetDistance(mPlayer->GetPosition()) >= TransferDistance) {
       throw ExLongDistance();
     }
     AVector2 v(0.0, 0.2);
-    v.Rotate(contSource->_obj->GetAngle());
+    v.Rotate(contSource->_obj->GetTransform().A);
 
-    contSource->_obj->DropObjectFromContainer(trObj, v.x, v.y);
+    contSource->_obj->DropObjectFromContainer(trObj, v);
     contSource->Refresh();
     sourceStatus = NoSource;
     return;
@@ -104,8 +106,8 @@ void GInGameContainerSystem::_checkAndDrop() {
       throw ExLongDistance();
     }
     AVector2 v(0.0, 0.2);
-    v.Rotate(invSource->GetCharacter()->GetAngle());
-    invSource->GetCharacter()->DropSlot(getSourceSlot(), v.x, v.y);
+    v.Rotate(invSource->GetCharacter()->GetTransform().A);
+    invSource->GetCharacter()->DropSlot(getSourceSlot(), v);
     invSource->Refresh();
     sourceStatus = NoSource;
     }
@@ -120,7 +122,7 @@ GInGameContainerSystem::GInGameContainerSystem(GGUI& iGui)
   : GContainerSystem(iGui) {
 }
 
-void GInGameContainerSystem::AddPlayerInventory(ACharacterBase* player) {
+void GInGameContainerSystem::AddPlayerInventory(ACharacter* player) {
   mPLI = new GPlayerInventory(player, gui, this);
 }
 
@@ -134,7 +136,7 @@ GInGameContainerSystem::~GInGameContainerSystem() {
 GContainerSystem::GContainerSystem(GGUI &iGui) : gui(iGui) {
 }
 
-GInventory* GContainerSystem::AddInventory(ACharacterBase *ch) {
+GInventory* GContainerSystem::AddInventory(ACharacter *ch) {
   auto it = invs.find(ch);
   if(it == invs.end()) {
     GInventory* inv = new GInventory(ch, gui, this);
@@ -186,7 +188,7 @@ void GContainerSystem::CloseAll() {
 }
 
 
-void GContainerSystem::RemoveInventory(ACharacterBase *ch) {
+void GContainerSystem::RemoveInventory(ACharacter *ch) {
   auto it = invs.begin();
   if((it = invs.find(ch)) != invs.end()) {
     mForRemoval.push_back(it->second);

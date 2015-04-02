@@ -23,7 +23,7 @@
 #include "const.h"
 #include "AScriptArea.hpp"
 #include "AWorldBase.h"
-#include "ACharacterBase.h"
+#include "ACharacter.h"
 #include "Global.h"
 
 
@@ -49,7 +49,7 @@ std::string AScriptWrapper::GetTemplateName(unsigned int id) {
 }
 
 void AScriptWrapper::AddEffect(unsigned int id, const std::string& effectName, double duration, double period, double measure) {
-  ACharacterBase* ch = dynamic_cast<ACharacterBase*>(mWorld->GetObjectByID(id));
+  ACharacter* ch = dynamic_cast<ACharacter*>(mWorld->GetObjectByID(id));
   if(ch) {
     EffectData ed;
     ed.Duration = duration * SECOND;

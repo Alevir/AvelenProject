@@ -42,7 +42,7 @@ class AHumanCombatModel
   const int ChangePositionIndex = 0;
   const int AttackIndex = 1;
 public:
-  AHumanCombatModel(ACharacterBase* mCharacter);
+  AHumanCombatModel(ACharacter* mCharacter);
   void subStep(double dt);
   unsigned int GetType() const { return (unsigned int)(CombatModels::Human); }
   int GetAttackPossition() const  { return (int)(AttackPosition); }

@@ -33,6 +33,11 @@
 
 
 
+std::map<std::string, double> APhysicObjectBase::sHMap {
+  {"creature", 2.0},
+  {"high_object", 1.0},
+  {"low_object", 0.5}
+};
 
 std::string APhysicObjectBase::ScriptNodeNames[] = {
   "SN_View",
@@ -41,115 +46,131 @@ std::string APhysicObjectBase::ScriptNodeNames[] = {
 
 
 
-APhysicObjectBase::APhysicObjectBase(const APhysicObjectData *data, ALocationBase* loc, const ObjectInitArgs& args)
-    : templateData(*data)   {
-  world = loc->GetMasterWorldBase();
+APhysicObjectBase::APhysicObjectBase(const APhysicObjectData& data, ALocationBase* loc, const ObjectInitArgs& args)
+    : mTemplateData(data)   {
+  mWorld = loc->GetMasterWorldBase();
   mLoc = loc;
-  z = args.z;
   if(args.ID < 0) {
     //throw std::logic_error("unacceptable!");
-    ID = world->idManager.AddObject(this);
+    mID = mWorld->idManager.AddObject(this);
   } else {
-    ID = args.ID;
-    world->idManager.AddPair(args.ID, this);
+    mID = args.ID;
+    mWorld->idManager.AddPair(args.ID, this);
   }
 
 
   if(args.UnID == std::numeric_limits<UniqueID>::max()) {
-    uniqueID = world->uniqueIDManager.GetNewID();
+    mUniqueID = mWorld->uniqueIDManager.GetNewID();
   } else {
-    uniqueID = args.UnID;
-    world->uniqueIDManager.AddValue(uniqueID);
+    mUniqueID = args.UnID;
+    mWorld->uniqueIDManager.AddValue(mUniqueID);
   }
 
-  weight = templateData.InitWeight;
+  mWeight = mTemplateData.InitWeight;
   if(args.Coords) {
-    b2BodyDef body_def;
-    body_def.type = templateData.b2type;
-    body_def.position.Set(args.x, args.y);
-    body_def.angle = args.angle;
-    body = world->physicWorld->CreateBody(&body_def);
+    RestoreBody(this, args.Tr, args.Z);
+    /*b2BodyDef body_def;
+    body_def.type = mTemplateData.b2type;
+    body_def.position.Set(args.X, args.Y);
+    body_def.angle = args.Angle;
+    mBody = mWorld->physicWorld->CreateBody(&body_def);
 
     b2FixtureDef fix_def;
-    if(templateData.fixtureType == APhysicObjectData::FixtureTypeBox) {
+    if(mTemplateData.fixtureType == APhysicObjectData::FixtureTypeBox) {
       b2PolygonShape* shape = new b2PolygonShape();
-      shape->SetAsBox(templateData.XLength / 2.0 , templateData.YLength / 2.0);
+      shape->SetAsBox(mTemplateData.XLength / 2.0 , mTemplateData.YLength / 2.0);
       fix_def.shape = shape;
     } else
-    if(templateData.fixtureType == APhysicObjectData::FixtureTypeCircle) {
+    if(mTemplateData.fixtureType == APhysicObjectData::FixtureTypeCircle) {
       b2CircleShape* shape = new b2CircleShape();
-      shape->m_radius = templateData.Radius;
+      shape->m_radius = mTemplateData.Radius;
       shape->m_p = b2Vec2(0, 0);
       fix_def.shape = shape;
     } else {
-      throw std::logic_error(std::string("unknown type in template ") + templateData.templateName);
+      throw std::logic_error(std::string("unknown type in template ") + mTemplateData.templateName);
     }
-    fix_def.density = templateData.density;
-    fix_def.friction = templateData.friction;
+    fix_def.density = mTemplateData.density;
+    fix_def.friction = mTemplateData.friction;
     auto cg = APhysicObjectData::CollisionGroup[data->collGroup];
     fix_def.filter.categoryBits = cg.first;
     fix_def.filter.maskBits = cg.second;
-    body->CreateFixture(&fix_def);
+    mBody->CreateFixture(&fix_def);
     delete fix_def.shape;
-    body->SetUserData(this);
+    mBody->SetUserData(this);
     b2MassData md;
-    body->GetMassData(&md);
-    md.mass = weight;
-    body->SetMassData(&md);
+    mBody->GetMassData(&md);
+    md.mass = mWeight;
+    mBody->SetMassData(&md);*/
 
   }
 
 
-  if(templateData.objectType == APhysicObjectData::OT_Armor) {
-    Protection = templateData.Protection;
+  if(mTemplateData.objectType == APhysicObjectData::OT_Armor) {
+    mProtection = mTemplateData.Protection;
   }
-  MaxHitPoints = templateData.InitMaxHitPoints;
-  HitPoints = MaxHitPoints;
-  _freeContSpace = templateData.containerCapacity;
+  mMaxHitPoints = mTemplateData.InitMaxHitPoints;
+  mHitPoints = mMaxHitPoints;
+  mFreeContSpace = mTemplateData.containerCapacity;
   mScripts.resize(2, "");
+}
+
+void APhysicObjectBase::Display(double dt) {
+  if(!mDrawer) throw std::logic_error("no drawer");
+  mDrawer->Draw(dt);
+}
+
+void APhysicObjectBase::Extrapolate(double dt) {
+  if(!mDrawer) throw std::logic_error("no drawer");
+  mDrawer->Extrapolate(dt);
+  mWasChanged = false;
+
+}
+
+bool APhysicObjectBase::CheckForChanges() {
+  return mWasChanged;
 }
 
 
 
 
 void APhysicObjectBase::Step(double dt) {
-  wasChanged = true;
+  mWasChanged = true;
 }
 
 double APhysicObjectBase::GetSharpness() {
-  assert(templateData.objectType == APhysicObjectData::OT_Weapon);
-  return Sharpness;
+  assert(mTemplateData.objectType == APhysicObjectData::OT_Weapon);
+  return mSharpness;
 }
 
 double APhysicObjectBase::GetVelocityModulus() {
-  if(body) {
-    return body->GetLinearVelocity().Length();
+  if(mBody) {
+    return mBody->GetLinearVelocity().Length();
   } else return -1.0;
 }
 
 double APhysicObjectBase::GetProtection() {
-  assert(templateData.objectType == APhysicObjectData::OT_Armor);
-  return Protection;
+  assert(mTemplateData.objectType == APhysicObjectData::OT_Armor);
+  return mProtection;
 }
 
 
 void APhysicObjectBase::Destroy() {
-if(containingObject) {
-    containingObject->container.erase(containingObject->container.find(this));
+if(mContainingObject) {
+    mContainingObject->mContainer.erase(mContainingObject->mContainer.find(this));
   }
   //? drop all objects
-  for(APhysicObjectBase* obj : container) {
-    obj->dropObject(GetX(), GetY(), GetZ());
-    }
+  for(APhysicObjectBase* obj : mContainer) {
+    dropObject(obj, GetTransform(), sHMap[obj->GetTemplateData()->collGroup]);
+  }
 }
 
 void APhysicObjectBase::TakeObjectFromWorld() {
-  if(body) {
+  if(mBody) {
     //? change impulse
-    world->physicWorld->DestroyBody(body);
-    body = 0;
+    mWorld->physicWorld->DestroyBody(mBody);
+    mBody = 0;
   }
-  world->SetInvisible(this);
+  mWorld->SetInvisible(this);
 }
 
 void APhysicObjectBase::SetLabel(const std::string& l) {
@@ -158,93 +179,114 @@ void APhysicObjectBase::SetLabel(const std::string& l) {
   mLabel = Game::Translations->GetTranslation(l);
 }
 
-void APhysicObjectBase::dropObject(double x, double y, double z) {
-  if(!body) {
-    RestoreBody(x, y, 0, z);
+void APhysicObjectBase::dropObject(APhysicObjectBase* obj, const ATransform& tr, double z) {
+  if(!obj->mBody) {
+    RestoreBody(obj, tr, z);
   } else {
-    SetPosition(AVector2(x,y));
+    obj->SetTransform(tr);
   }
-  containingObject->ChangeMass(-weight);
-  containingObject = 0;
+  obj->mContainingObject->ChangeMass(-obj->mWeight);
+  obj->mContainingObject = 0;
 }
 
 APhysicObjectBase::~APhysicObjectBase() {
-  world->idManager.ReleaseID(ID);
-  if(body) {
-    world->physicWorld->DestroyBody(body);
+  mWorld->idManager.ReleaseID(mID);
+  if(mBody) {
+    mWorld->physicWorld->DestroyBody(mBody);
   }
 }
 
-void APhysicObjectBase::RestoreBody(double iX, double iY, double iAngle, double iZ) {
+void APhysicObjectBase::RestoreBody(APhysicObjectBase* obj, ATransform t, double z) {
   b2BodyDef body_def;
-  body_def.type = templateData.b2type;
-  body_def.position.Set(iX, iY);
-  body_def.angle = iAngle;
-  body = world->physicWorld->CreateBody(&body_def);
+  body_def.type = obj->mTemplateData.b2type;
+  body_def.position.Set(t.X, t.Y);
+  body_def.angle = t.A;
+  obj->mBody = obj->mWorld->physicWorld->CreateBody(&body_def);
 
-  b2PolygonShape shape;
-  if(templateData.fixtureType == APhysicObjectData::FixtureTypeBox) {
-    shape.SetAsBox(templateData.XLength / 2.0 , templateData.YLength / 2.0);
+  b2FixtureDef fixDef;
+  if(obj->mTemplateData.fixtureType == APhysicObjectData::FixtureTypeBox) {
+    b2PolygonShape* shape = new b2PolygonShape();
+    shape->SetAsBox(obj->mTemplateData.XLength / 2.0 , obj->mTemplateData.YLength / 2.0);
+    fixDef.shape = shape;
+  } else
+  if(obj->mTemplateData.fixtureType == APhysicObjectData::FixtureTypeCircle) {
+    b2CircleShape* shape = new b2CircleShape();
+    shape->m_radius = obj->mTemplateData.Radius;
+    shape->m_p = b2Vec2(0, 0);
+    fixDef.shape = shape;
   } else {
-    throw std::logic_error(std::string("unknown type in template ") + templateData.templateName);
+    throw std::logic_error(std::string("unknown type in template ") + obj->mTemplateData.templateName);
   }
 
-  b2FixtureDef fix_def;
-  fix_def.shape = &shape;
-  fix_def.density = templateData.density;
-  fix_def.friction = templateData.friction;
-  auto cg = APhysicObjectData::CollisionGroup[templateData.collGroup];
-  fix_def.filter.categoryBits = cg.first;
-  fix_def.filter.maskBits = cg.second;
-  body->CreateFixture(&fix_def);
-  body->SetUserData(this);
+  fixDef.density = obj->mTemplateData.density;
+  fixDef.friction = obj->mTemplateData.friction;
+  auto cg = APhysicObjectData::CollisionGroup[obj->mTemplateData.collGroup];
+  fixDef.filter.categoryBits = cg.first;
+  fixDef.filter.maskBits = cg.second;
+  obj->mBody->CreateFixture(&fixDef);
+  obj->mBody->SetUserData(obj);
   b2MassData md;
-  body->GetMassData(&md);
-  md.mass = weight;
-  body->SetMassData(&md);
+  obj->mBody->GetMassData(&md);
+  md.mass = obj->mWeight;
+  obj->mBody->SetMassData(&md);
 
-  z = iZ;
-  world->SetVisible(this);
+  obj->mZ = sHMap[obj->mTemplateData.collGroup];
+  obj->mWorld->SetVisible(obj);
 }
 
-double APhysicObjectBase::GetX() {
-  if(body) {
-    return body->GetPosition().x;
-  }
-  if(!containingObject) throw std::logic_error("can't find coords");
-  return containingObject->GetX();
-}
-
-double APhysicObjectBase::GetAngle() {
-  if(body) {
-    return body->GetAngle();
-  }
-  if(!containingObject) throw std::logic_error("can't find coords");
-  return containingObject->GetAngle();
-}
-
-
-double APhysicObjectBase::GetY() {
-    if(body) {
-    return body->GetPosition().y;
-  }
-  if(!containingObject) throw std::logic_error("cant find coords");
-  return containingObject->GetY();
-}
 
 
 double APhysicObjectBase::GetZ() {
-  return z;
+  return mZ;
+}
+
+void APhysicObjectBase::GetTransform(ATransform& tr) const {
+  if(mBody) {
+    auto v = mBody->GetPosition();
+    tr.X = v.x;
+    tr.Y = v.y;
+    tr.A = mBody->GetAngle();
+    return;
+  }
+  if(!mContainingObject) throw std::logic_error("can't find coords");
+  mContainingObject->GetTransform(tr);
+}
+
+ATransform APhysicObjectBase::GetTransform() {
+  ATransform tr;
+  GetTransform(tr);
+  return tr;
+}
+
+void APhysicObjectBase::GetTransformExtr(ATransform& tr) {
+  mDrawer->GetExtrapolatedCoords(tr);
+}
+
+AVector2 APhysicObjectBase::GetPosition() {
+  ATransform tr; GetTransform(tr);
+  return AVector2(tr.X, tr.Y);
+}
+
+void APhysicObjectBase::GetVelocity(ATransform& tr) const {
+  if(mBody) {
+    auto v = mBody->GetLinearVelocity();
+    tr.X = v.x;
+    tr.Y = v.y;
+    tr.A = mBody->GetAngularVelocity();
+    return;
+  }
+  if(!mContainingObject) throw std::logic_error("can't find coords");
+    mContainingObject->GetVelocity(tr);
 }
 
 
-double APhysicObjectBase::GetWeight() {
-  return weight;
+double APhysicObjectBase::GetWeight() const {
+  return mWeight;
 }
 
 
-double APhysicObjectBase::GetVolume() {
-  return templateData.externalVolume;
+double APhysicObjectBase::GetVolume() const {
+  return mTemplateData.externalVolume;
 }
 
 
@@ -253,59 +295,59 @@ void APhysicObjectBase::AddObjectToContainer(APhysicObjectBase* obj) {
   if(obj == this) {
     throw std::logic_error("can't put object inside itself!!!");
   }
-  if(obj == containingObject) {
+  if(obj == mContainingObject) {
     throw std::logic_error("WTF?!");
   }
   std::set<APhysicObjectBase*>::iterator it;
-  it = container.find(obj);
-  if(it != container.end()) {
+  it = mContainer.find(obj);
+  if(it != mContainer.end()) {
     throw std::logic_error("object is already in container");
   }
 
 
-  if(obj->GetVolume() <= _freeContSpace) {
-    _freeContSpace -= obj->GetVolume();
+  if(obj->GetVolume() <= mFreeContSpace) {
+    mFreeContSpace -= obj->GetVolume();
   } else {
     throw ExContainerIsFull();
   }
 
-  ChangeMass(obj->weight);
-  if(obj->body) {
+  ChangeMass(obj->mWeight);
+  if(obj->mBody) {
     //? change impulse
-    world->physicWorld->DestroyBody(obj->body);
-    obj->body = 0;
+    mWorld->physicWorld->DestroyBody(obj->mBody);
+    obj->mBody = 0;
   }
-  container.insert(obj);
-  obj->world->SetInvisible(obj);
-  obj->containingObject = this;
+  mContainer.insert(obj);
+  obj->mWorld->SetInvisible(obj);
+  obj->mContainingObject = this;
 }
 
 
 APhysicObjectBase* APhysicObjectBase::GetObjectFromContainer(APhysicObjectBase* obj) {
   std::set<APhysicObjectBase*>::iterator it;
-  it = container.find(obj);
-  if(it == container.end()) {
+  it = mContainer.find(obj);
+  if(it == mContainer.end()) {
     throw std::logic_error("required object doesn't exist");
   }
-  ChangeMass(-obj->weight);
-  _freeContSpace += obj->GetVolume();
-  container.erase(it);
-  obj->containingObject = 0;
+  ChangeMass(-obj->mWeight);
+  mFreeContSpace += obj->GetVolume();
+  mContainer.erase(it);
+  obj->mContainingObject = 0;
   return obj;
 }
 
 
 void APhysicObjectBase::TransferObject(APhysicObjectBase* targetContainer, APhysicObjectBase* object) {
   std::set<APhysicObjectBase*>::iterator it;
-  it = container.find(object);
-  if(it == container.end()) {
+  it = mContainer.find(object);
+  if(it == mContainer.end()) {
     throw std::logic_error("required object doesn't exist");
   }
   targetContainer->AddObjectToContainer(object);
-  _freeContSpace += object->GetVolume();
-  container.erase(it);
-  ChangeMass(-object->weight);
-  object->containingObject = targetContainer;
+  mFreeContSpace += object->GetVolume();
+  mContainer.erase(it);
+  ChangeMass(-object->mWeight);
+  object->mContainingObject = targetContainer;
 
 }
 
@@ -314,89 +356,96 @@ void APhysicObjectBase::SetScript(APhysicObjectBase::ScriptNode sn, const std::s
 }
 
 void APhysicObjectBase::ExecuteScript(APhysicObjectBase::ScriptNode sn, APhysicObjectBase* triggeringObj) {
-  world->GetScriptWrapper().ScrExec.eval("trObj = " + boost::lexical_cast<std::string>(triggeringObj->GetID()));
-  world->GetScriptWrapper().ScrExec.eval(mScripts.at(sn));
+  mWorld->GetScriptWrapper().ScrExec.eval("trObj = " + boost::lexical_cast<std::string>(triggeringObj->GetID()));
+  mWorld->GetScriptWrapper().ScrExec.eval(mScripts.at(sn));
 
 }
 
-const std::vector<std::string>& APhysicObjectBase::GetScripts() {
+const std::vector<std::string>& APhysicObjectBase::GetScripts() const {
   return mScripts;
 }
 
-APhysicObjectBase* APhysicObjectBase::DropObjectFromContainer(APhysicObjectBase* obj, double distX, double distY) {
+
+const std::set<APhysicObjectBase*> APhysicObjectBase::GetContainedObjects() const {
+  return mContainer;
+}
+
+
+APhysicObjectBase* APhysicObjectBase::DropObjectFromContainer(APhysicObjectBase* obj, const ATransform& shift) {
   std::set<APhysicObjectBase*>::iterator it;
-  it = container.find(obj);
-  if(it == container.end()) {
+  it = mContainer.find(obj);
+  if(it == mContainer.end()) {
     throw std::logic_error("required object doesn't exist");
   }
-  container.erase(it);
-  _freeContSpace += obj->GetVolume();
-  static std::map<std::string, double> hmap {
-    {"creature", 2.0},
-    {"high_object", 1.0},
-    {"low_object", 0.5}
-  };
-  obj->RestoreBody(GetX() + distX, GetY() + distY, GetAngle(), hmap[obj->GetTemplateData()->collGroup]);
-  ChangeMass(-obj->weight);
+  mContainer.erase(it);
+  mFreeContSpace += obj->GetVolume();
 
-  obj->world->SetVisible(obj);
-  obj->containingObject = 0;
+  RestoreBody(obj, GetTransform() += shift, sHMap[obj->GetTemplateData()->collGroup]);
+  ChangeMass(-obj->mWeight);
+
+  obj->mWorld->SetVisible(obj);
+  obj->mContainingObject = 0;
   return obj;
 }
 
 void APhysicObjectBase::ApplyLinearImpulse(double x, double y) {
-  body->ApplyLinearImpulse(b2Vec2(x,y), body->GetWorldCenter(), true);
+  mBody->ApplyLinearImpulse(b2Vec2(x,y), mBody->GetWorldCenter(), true);
 }
 
 void APhysicObjectBase::ApplyAngularImpulse(double w) {
-  body->ApplyAngularImpulse(w, true);
+  mBody->ApplyAngularImpulse(w, true);
 }
 
 void APhysicObjectBase::ApplyLinearImpulse(b2Vec2 v) {
-body->ApplyLinearImpulse(v, body->GetWorldCenter(), true);
+  mBody->ApplyLinearImpulse(v, mBody->GetWorldCenter(), true);
 }
 
 void APhysicObjectBase::ApplyLinearVelocity(b2Vec2 v) {
-  if(body) {
-    body->SetLinearVelocity(v);
+  if(mBody) {
+    mBody->SetLinearVelocity(v);
   } else throw std::logic_error("");
 }
 
 void APhysicObjectBase::ApplyAngularVelocity(double w) {
-  if(body) {
-    body->SetAngularVelocity(w);
+  if(mBody) {
+    mBody->SetAngularVelocity(w);
   } else throw std::logic_error("");
 }
 
 
 
 void APhysicObjectBase::SetDamping(double d) {
-  body->SetLinearDamping(d);
-  body->SetAngularDamping(d);
+  if(!mBody) return;
+  mBody->SetLinearDamping(d);
+  mBody->SetAngularDamping(d);
 }
 
 
-AVector2 APhysicObjectBase::GetPosition() {
-  return AVector2(GetX(), GetY());
-}
 
 
 void APhysicObjectBase::ChangeMass(double deltaMass) {
-  weight += deltaMass;
-  if(!body) {
-    if(!containingObject) throw std::logic_error("object has no body and pointer to containing object is null at the same time");
-    containingObject->ChangeMass(deltaMass);
+  mWeight += deltaMass;
+  if(!mBody) {
+    if(!mContainingObject) throw std::logic_error("object has no body and pointer to containing object is null at the same time");
+    mContainingObject->ChangeMass(deltaMass);
   } else {
     b2MassData md;
-    body->GetMassData(&md);
+    mBody->GetMassData(&md);
     md.mass += deltaMass;
-    body->SetMassData(&md);
+    mBody->SetMassData(&md);
   }
 }
 
 
-bool APhysicObjectBase::SetPosition(const AVector2& pos) {
-  if(!body) return false;
-  body->SetTransform(pos, body->GetAngle());
+bool APhysicObjectBase::SetTransform(const ATransform& tr) {
+  if(!mBody) return false;
+  mBody->SetTransform(b2Vec2(tr.X, tr.Y), tr.A);
   return true;
+}
+
+
+ATransform&ATransform::operator +=(const ATransform& tr) {
+  X+=tr.X;
+  Y+=tr.Y;
+  A+=tr.A;
 }

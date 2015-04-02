@@ -16,16 +16,22 @@
     along with Avelen Project.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-#include "ACharacterData.hpp"
-#include "Global.h"
 
+#ifndef ACHARACTERDRAWERSFML_HPP
+#define ACHARACTERDRAWERSFML_HPP
+#include "AObjectDrawerSFML.hpp"
+class ACharacter;
 
-ACharacterData::ACharacterData(libconfig::Setting &data)
-: Race(&(Game::CharacterRaces.find((const char*)data["race"]))->second), APhysicObjectData(data) {
-  data.lookupValue("lvl", Level);
-  data.lookupValue("str", Str);
-  data.lookupValue("acc", Acc);
-  data.lookupValue("reg", Reg);
-  data.lookupValue("maxHP", MaxHP);
-  data.lookupValue("maxEP", MaxEP);
-}
+class ACharacterDrawerSFML : public AObjectDrawerSFML {
+
+protected:
+  ACharacter* mChar = 0;
+
+public:
+  ACharacterDrawerSFML(ALocationBase* loc, ACharacter* obj);
+  virtual void Draw(double dt);
+  ~ACharacterDrawerSFML() {}
+
+};
+
+#endif // ACHARACTERDRAWERSFML_HPP

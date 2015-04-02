@@ -71,9 +71,10 @@ void GObjectCreationWindow::Begin() {
   initPos = AWorldSFML::ConvertMouseCurrentPos();
   if(rSingle->isChecked()) {
     ObjectInitArgs args;
-    args.x = initPos.x;
-    args.y = initPos.y;
-    mWorld->FindLocationByCoords(initPos.x, initPos.y)->AddObject(templateName->getSelectedItem(), args);
+    args.Tr.X = initPos.x;
+    args.Tr.Y = initPos.y;
+    assert(0);
+    //mWorld->FindLocationByCoords(initPos.x, initPos.y)->AddObject(templateName->getSelectedItem(), args);
     mInProcess = false;
     return;
   } else {
@@ -204,7 +205,7 @@ GObjectInfoWindow::GObjectInfoWindow(GInfoManager<APhysicObjectBase, GObjectInfo
 
 
 
-GCharacterInfoWindow::GCharacterInfoWindow(GInfoManager<ACharacterBase, GCharacterInfoWindow>* manager, ACharacterBase *obj)
+GCharacterInfoWindow::GCharacterInfoWindow(GInfoManager<ACharacter, GCharacterInfoWindow>* manager, ACharacter *obj)
     : _manager(manager), GuiWindow(manager->_gui), _obj(obj), lInfo(*mWindow) {
   mWindow->setSize(600, 400);
   auto v = sf::Mouse::getPosition(*Game::Window);
@@ -362,7 +363,7 @@ GRightClickMenu::GRightClickMenu(GGUI &gui, AWorldBase *world)
 void GRightClickObjectMenu::_activateItem(const sf::String &itemName) {
   if(itemName == "Show info") {
     if(_obj->GetTemplateData()->objectType == APhysicObjectData::OT_Character) {
-      _CIM->ShowObjectInfo(dynamic_cast<ACharacterBase*>(_obj));
+      _CIM->ShowObjectInfo(dynamic_cast<ACharacter*>(_obj));
     } else {
       _IM->ShowObjectInfo(_obj);
     }
@@ -383,7 +384,7 @@ void GRightClickObjectMenu::_activateItem(const sf::String &itemName) {
 
 }
 
-GRightClickObjectMenu::GRightClickObjectMenu(GGUI &gui, AWorldBase *world, GContainerSystem* CS, GInfoManager<APhysicObjectBase, GObjectInfoWindow>* IM, GInfoManager<ACharacterBase, GCharacterInfoWindow> *CIM)
+GRightClickObjectMenu::GRightClickObjectMenu(GGUI &gui, AWorldBase *world, GContainerSystem* CS, GInfoManager<APhysicObjectBase, GObjectInfoWindow>* IM, GInfoManager<ACharacter, GCharacterInfoWindow> *CIM)
     : GDropDownMenu(gui, world), _CS(CS), _IM(IM), _CIM(CIM) {
   AddItem("Show info");
   AddItem("Show container");

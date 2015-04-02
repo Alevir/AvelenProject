@@ -32,7 +32,7 @@
 #include "AScriptWrapper.hpp"
 class AWorldBase;
 class AGroundCell;
-#include "ACharacterBase.h"
+#include "ACharacter.h"
 
 
 struct ContextLocArgs {
@@ -51,7 +51,7 @@ class ALocationBase {
   void _writeContainer(libconfig::Setting& s, APhysicObjectBase* obj);
 
   void _readObject(libconfig::Setting& s, APhysicObjectBase* obj);
-  void _readCharacter(libconfig::Setting& s, ACharacterBase* obj);
+  void _readCharacter(libconfig::Setting& s, ACharacter* obj);
   void _readContainer(libconfig::Setting& s, APhysicObjectBase* obj);
 
   //load & save
@@ -77,7 +77,6 @@ protected:
   const double cellSize = 1.0;
 
   std::set<APhysicObjectBase*> mLocalObjects;
-  std::set<ACharacterBase*> mLocalCharacters;
   AWorldBase* world;
   void loadLocationFromCfg(libconfig::Config& c, const ContextLocArgs& la = ContextLocArgs());
   //virtual void loadGroundCells(const std::string& iLocationFileName) = 0;
@@ -88,7 +87,7 @@ protected:
   inline ALocationBase* boundsTest(APhysicObjectBase* obj, int& x, int& y);
   void transferObj(APhysicObjectBase* obj, std::set<APhysicObjectBase*>::iterator& validIt, ALocationBase* dest);
   void transferObj(std::set<APhysicObjectBase*>::iterator& it, ALocationBase* dest);
-  void transferCharacter(std::set<ACharacterBase*>::iterator& it, ALocationBase* dest);
+  void transferCharacter(std::set<APhysicObjectBase*>::iterator& it, ALocationBase* dest);
 
 
 public:
@@ -101,10 +100,10 @@ public:
 
   ALocationScriptContent& GetScriptContent() { return mScrCont; }
   void Save(const std::string& iFileName);
-  APhysicObjectBase* AddObject(std::string iTemplateName, ObjectInitArgs& args);
-  APhysicObjectBase* AddObject(std::string iTemplateName, APhysicObjectBase* container,  ObjectInitArgs& args);
-  APhysicObjectBase* AddObject(std::string iTemplateName, ACharacterBase* character, InventorySlot slot,  ObjectInitArgs& args);
-  ACharacterBase* AddCharacter(const ACharacterData* data, ObjectInitArgs& args);
+  APhysicObjectBase* AddObject(const APhysicObjectData& data, ObjectInitArgs& args);
+  APhysicObjectBase* AddObject(const APhysicObjectData& data, APhysicObjectBase* container,  ObjectInitArgs& args);
+  APhysicObjectBase* AddObject(const APhysicObjectData& data, ACharacter* character, InventorySlot slot,  ObjectInitArgs& args);
+  //ACharacter* AddCharacter(const ACharacterData* data, ObjectInitArgs& args);
   void RemoveAObject(APhysicObjectBase* obj);
   const AGroundCell* GetCell(int x, int y);
   void Step(double dt);

@@ -20,18 +20,18 @@
 #include "Global.h"
 #include "ASpriteContainer.h"
 #include "ADebugOutput.h"
-#include "ACharacterBase.h"
+#include "ACharacter.h"
 
 
 
-RepeatingEffect::RepeatingEffect(double duration, double period, const std::string &effectName, ACharacterBase *ch)
+RepeatingEffect::RepeatingEffect(double duration, double period, const std::string &effectName, ACharacter *ch)
 : RepeatingAction(duration, period), Effect(effectName, ch){
 
 }
 
 
 EfRepValueChange::EfRepValueChange(double duration, double period, const std::string &effectName,
- ACharacterBase *ch, double& changedValue, double measure)
+ ACharacter *ch, double& changedValue, double measure)
     : RepeatingEffect(duration, period, effectName, ch), _value(changedValue), _measure(measure) {
 
 }
@@ -71,7 +71,7 @@ void EfRepValueChange::Write(libconfig::Setting &group) {
 
 
 
-Effect* Effect::CreateEffect(const EffectData& ed, ACharacterBase* ch) {
+Effect* Effect::CreateEffect(const EffectData& ed, ACharacter* ch) {
   if(ed.Name == "PeriodicHPRestore") {
     return new EfRepValueChange(ed.Duration, ed.Period, ed.Name, ch, ch->mHP, ed.Measure);
   } else
@@ -81,7 +81,7 @@ Effect* Effect::CreateEffect(const EffectData& ed, ACharacterBase* ch) {
     throw std::logic_error("unknown effect");
 }
 
-Effect::Effect(const std::string& effectName, ACharacterBase* ch) : EffectName(effectName) {
+Effect::Effect(const std::string& effectName, ACharacter* ch) : EffectName(effectName) {
   _ch = ch;
 }
 

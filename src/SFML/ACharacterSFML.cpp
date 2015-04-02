@@ -26,7 +26,7 @@
 #include "ALocationSFML.h"
 #include "Global.h"
 
-
+/*
 void ACharacterSFML::Display(double dt) {
   APhysicObjectSFML::Display(dt);
   sf::RectangleShape line(sf::Vector2f(100 * mHP / mMaxHP, 5));
@@ -52,5 +52,6 @@ void ACharacterSFML::Display(double dt) {
 ACharacterSFML::ACharacterSFML(const ACharacterData* data, ALocationSFML* loc, const ObjectInitArgs& args)
 : APhysicObjectBase(data, loc, args),
 APhysicObjectSFML(data, loc, args),
-ACharacterBase(data, loc, args) {
+ACharacter(data, loc, args) {
 }
+*/

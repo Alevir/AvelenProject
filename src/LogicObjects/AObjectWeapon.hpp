@@ -17,22 +17,14 @@
 
 */
 
-#ifndef ACHARACTERDATA_HPP
-#define ACHARACTERDATA_HPP
-#include "APhysicObjectData.h"
-#include "Character/Race.h"
+#ifndef AOBJECTWEAPON_HPP
+#define AOBJECTWEAPON_HPP
+#include "ANonCharacterLogicObject.hpp"
 
-
-class ACharacterData : public APhysicObjectData {
-public:
-  const CharacterRace* Race;
-  double Level = -1;
-  double Str = -1;
-  double Acc = -1;
-  double Reg = -1;
-  double MaxHP = -1;
-  double MaxEP = -1;
-  ACharacterData(libconfig::Setting& data);
+class AObjectWeapon : public ANonCharacterLogicObject {
+  friend class AWorldBase;
+protected:
+  AObjectWeapon(const APhysicObjectData& data, ALocationBase* loc, const ObjectInitArgs& args);
 };
 
-#endif // ACHARACTERDATA_HPP
+#endif // AOBJECTWEAPON_HPP

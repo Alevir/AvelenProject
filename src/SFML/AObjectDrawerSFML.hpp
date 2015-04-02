@@ -1,5 +1,6 @@
 /*
     This file is part of Avelen Project.
+    Copyright (c) 2014  Evdokimov Mikhail
 
     Avelen Project is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,28 +15,21 @@
     You should have received a copy of the GNU General Public License
     along with Avelen Project.  If not, see <http://www.gnu.org/licenses/>.
 
-    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    Authors of file: Mikhail Evdokimov
-
-    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 */
 
-#ifndef APHYSICOBJECTSFML_H
-#define APHYSICOBJECTSFML_H/*
-#include "APhysicObjectBase.h"
+#ifndef AOBJECTDRAWERSFML_HPP
+#define AOBJECTDRAWERSFML_HPP
 
+#include "AObjectDrawer.hpp"
 #include "AAnimationScheme.hpp"
 #include "const.h"
-
 class AWorldSFML;
-class ALocationSFML;
-class AAnimationScheme;
-class ASprite;
 
-class APhysicObjectSFML
-    : virtual public APhysicObjectBase {
+class AObjectDrawerSFML : public AObjectDrawer {
+
+  friend class ALocationBase;
   friend class AWorldSFML;
+
 protected:
   ASprite* sprite;
   AAnimation animation;
@@ -46,7 +40,7 @@ protected:
   const int a = 2;
   bool visible = true;
   double lastVisZ = 0.0;
-  virtual ~APhysicObjectSFML();
+  virtual ~AObjectDrawerSFML();
   bool flickering = false;
   double flickTime = 0.0;
 
@@ -58,19 +52,15 @@ protected:
   double delta = SECOND / 15.0;
   double deltaAc = SECOND / 15.0;
 
-
 public:
+  AObjectDrawerSFML(ALocationBase* loc, APhysicObjectBase* obj);
 
-
-  APhysicObjectSFML(const APhysicObjectData* mTemplateData, ALocationSFML* loc, const ObjectInitArgs& args);
-
-  virtual void Display(double dt);
+  void GetExtrapolatedCoords(ATransform& tr);
   void Extrapolate(double dt);
-  void SetFlickering(bool b) {
-    flickering = b;
-  }
-
+  void Draw(double dt);
 
 };
-*/
-#endif // APHYSICOBJECTSFML_H
+
+
+
+#endif // AOBJECTDRAWERSFML_HPP

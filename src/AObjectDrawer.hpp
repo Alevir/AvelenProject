@@ -1,5 +1,6 @@
 /*
     This file is part of Avelen Project.
+    Copyright (c) 2014  Evdokimov Mikhail
 
     Avelen Project is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,26 +15,29 @@
     You should have received a copy of the GNU General Public License
     along with Avelen Project.  If not, see <http://www.gnu.org/licenses/>.
 
-    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    Authors of file: Mikhail Evdokimov
-
-    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 */
 
-#ifndef AOBJECT_H
-#define AOBJECT_H
+#ifndef AOBJECTDRAWER_HPP
+#define AOBJECTDRAWER_HPP
 
-typedef unsigned char byte;
+class APhysicObjectBase;
+class ALocationBase;
+class ATransform;
 
-class RemovableObject {
+class AObjectDrawer {
+  friend class ALocationBase;
 
-};
-
-class AObject : public RemovableObject {
+protected:
+  APhysicObjectBase* mObj;
+  ALocationBase* mLoc;
 
 public:
-  virtual ~AObject() {}
+  AObjectDrawer(ALocationBase* loc, APhysicObjectBase* obj);
+
+  virtual void Extrapolate(double dt) = 0;
+  virtual void Draw(double dt) = 0;
+  virtual void GetExtrapolatedCoords(ATransform& tr) = 0;
+  virtual ~AObjectDrawer();
 };
 
-#endif // AOBJECT_H
+#endif // AOBJECTDRAWER_HPP

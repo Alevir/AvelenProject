@@ -1,5 +1,6 @@
 /*
     This file is part of Avelen Project.
+    Copyright (c) 2014  Evdokimov Mikhail
 
     Avelen Project is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,82 +15,71 @@
     You should have received a copy of the GNU General Public License
     along with Avelen Project.  If not, see <http://www.gnu.org/licenses/>.
 
-    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    Authors of file: Mikhail Evdokimov
-
-    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 */
 
-/*
-#include "APhysicObjectSFML.h"
+#include "AObjectDrawerSFML.hpp"
+#include "APhysicObjectBase.h"
 #include "AWorldSFML.h"
-#include "ALocationSFML.h"
 #include "Global.h"
-
 #include "ASpriteContainer.h"
 
 
-APhysicObjectSFML::APhysicObjectSFML(const APhysicObjectData* data, ALocationSFML *loc, const ObjectInitArgs& args)
-    : APhysicObjectBase(data, loc, args) {
-  sfmlWorld = loc->GetMasterWorldSFML();
-  switch(data->drawType) {
+
+AObjectDrawerSFML::AObjectDrawerSFML(ALocationBase* loc, APhysicObjectBase* obj)
+  : AObjectDrawer(loc, obj) {
+  switch(mObj->GetTemplateData()->drawType) {
   case APhysicObjectData::DT_Sprite:
-    sprite = Game::ObjectSpriteContainer->GetSprite(data->sprite);
+    sprite = Game::ObjectSpriteContainer->GetSprite(mObj->GetTemplateData()->sprite);
     break;
   case APhysicObjectData::DT_Animation:
-    animation = Game::animContainer->GetAnimation(data->animation);
+    animation = Game::animContainer->GetAnimation(mObj->GetTemplateData()->animation);
     break;
   case APhysicObjectData::DT_Scheme:
-    scheme = new AAnimationScheme(Game::AnimationSchemes->GetTemplate(data->scheme));
+    scheme = new AAnimationScheme(Game::AnimationSchemes->GetTemplate(mObj->GetTemplateData()->scheme));
   }
-  if(args.Coords) {
-    mExtraCoord[0] = mBody->GetPosition().x;
-    mExtraCoord[1] = mBody->GetPosition().y;
-    mExtraCoord[2] = mBody->GetAngle();
-  }
-
+  sfmlWorld = static_cast<AWorldSFML*>(mObj->GetWorld());
 }
 
+void AObjectDrawerSFML::GetExtrapolatedCoords(ATransform& tr) {
+  tr.X = c[0];
+  tr.Y = c[1];
+  tr.A = c[2];
+}
 
-
-
-double MaxObjectHalfSize = 1.0;
-
-void APhysicObjectSFML::Extrapolate(double dt) {
+void AObjectDrawerSFML::Extrapolate(double dt) {
   deltaAc += dt;
   if(!visible) return;
-  if(mWasChanged) {
+  if(mObj->CheckForChanges()) {
     delta = deltaAc;
     deltaAc = 0.0;
-    c[x] = mExtraCoord[x] = mBody->GetPosition().x;
-    c[y] = mExtraCoord[y] = mBody->GetPosition().y;
-    c[a] = mExtraCoord[a] = mBody->GetAngle();
+    ATransform t = mObj->GetTransform();
+    c[x] = mExtraCoord[x] = t.X;
+    c[y] = mExtraCoord[y] = t.Y;
+    c[a] = mExtraCoord[a] = t.A;
     for(int i = 0; i < 3; i++) {
       vp[i] = vc[i];
     }
-    vc[x] = mBody->GetLinearVelocity().x;
-    vc[y] = mBody->GetLinearVelocity().y;
-    vc[a] = mBody->GetAngularVelocity();
+    mObj->GetVelocity(t);
+    vc[x] = t.X;
+    vc[y] = t.Y;
+    vc[a] = t.A;
     for(int i = 0; i < 3; i++) {
       ac[i] = (vc[i] - vp[i]) / delta;
     }
-
-    mWasChanged = false;
   } else {
-    for(int i = 0; i < 3; i++) {
+    for(size_t i = 0; i < 3; i++) {
       mExtraCoord[i] = c[i] + vc[i] * deltaAc / SECOND + ac[i] * deltaAc * deltaAc  / SECOND / 2;
     }
   }
 }
 
-void APhysicObjectSFML::Display(double dt) {
+void AObjectDrawerSFML::Draw(double dt) {
   if(!visible) return;
   if( mExtraCoord[x] < ASprite::cdx - ASprite::renderRadius || mExtraCoord[x] > ASprite::cdx + ASprite::renderRadius
     || mExtraCoord[y] < ASprite::cdy - ASprite::renderRadius || mExtraCoord[y] > ASprite::cdy + ASprite::renderRadius) return;
 
   ASprite* spr;
-  switch(mTemplateData.drawType) {
+  switch(mObj->GetTemplateData()->drawType) {
   case APhysicObjectData::DT_Sprite:
     spr = sprite;
     break;
@@ -125,27 +115,20 @@ void APhysicObjectSFML::Display(double dt) {
     s.setScale(spr->getScale());
     s.setPosition(spr->getPosition());
     s.setRotation(spr->getRotation());
-
-    //Game::Window->draw(s);
     flickering = false;
     sfmlWorld->focused = true;
   }
-  //sf::Color cc = sf::Color::White - sfmlWorld->dayTime;
   sf::Color cc = sf::Color::Black;
   cc.a = (sfmlWorld->dayTime.r/6 + sfmlWorld->dayTime.g/6 + sfmlWorld->dayTime.b/6) + 128;
   spr->SetShadowColor(cc);
   Game::Window->draw(spr->GetShadow());
   //Game::Window->draw(*spr);
   sfmlWorld->mPreparedSprites.push_back(AWorldSFML::drawData(spr,
-    mExtraCoord[x] * PIXELS_IN_METER, - mExtraCoord[y] * PIXELS_IN_METER, -mExtraCoord[a]));
-
-
+                                                             mExtraCoord[x] * PIXELS_IN_METER, - mExtraCoord[y] * PIXELS_IN_METER, -mExtraCoord[a]));
 }
 
-
-APhysicObjectSFML::~APhysicObjectSFML() {
-  if(mTemplateData.drawType == APhysicObjectData::DT_Scheme) {
+AObjectDrawerSFML::~AObjectDrawerSFML() {
+  if(mObj->GetTemplateData()->drawType == APhysicObjectData::DT_Scheme) {
     delete scheme;
   }
 }
-*/

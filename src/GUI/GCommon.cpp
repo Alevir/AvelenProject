@@ -19,7 +19,7 @@
 #include "GCommon.h"
 #include "Global.h"
 #include "AWorldBase.h"
-#include "ACharacterBase.h"
+#include "ACharacter.h"
 #include "Common.h"
 #include "Mode.h"
 

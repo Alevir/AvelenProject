@@ -27,7 +27,7 @@
 #include "ADebugOutput.h"
 
 
-AHumanCombatModel::AHumanCombatModel(ACharacterBase *character)
+AHumanCombatModel::AHumanCombatModel(ACharacter *character)
     : ACombatModelBase(character) {
   mActions.resize(2, 0);
 }

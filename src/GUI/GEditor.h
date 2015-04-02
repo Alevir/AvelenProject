@@ -30,7 +30,7 @@
 #include "GObjectTemplateEditor.hpp"
 class AWorldBase;
 class APhysicObjectBase;
-class ACharacterBase;
+class ACharacter;
 class EditorMode;
 class GContainerSystem;
 class GScriptEditor;
@@ -78,12 +78,12 @@ class GObjectInfoWindow : public GuiWindow {
 
 
 class GCharacterInfoWindow : public GuiWindow {
-  friend class GInfoManager<ACharacterBase, GCharacterInfoWindow>;
-  GInfoManager<ACharacterBase, GCharacterInfoWindow>* _manager;
-  ACharacterBase* _obj;
+  friend class GInfoManager<ACharacter, GCharacterInfoWindow>;
+  GInfoManager<ACharacter, GCharacterInfoWindow>* _manager;
+  ACharacter* _obj;
   tgui::TextBox::Ptr lInfo;
   void _onClose();
-  GCharacterInfoWindow(GInfoManager<ACharacterBase, GCharacterInfoWindow>* manager, ACharacterBase* obj);
+  GCharacterInfoWindow(GInfoManager<ACharacter, GCharacterInfoWindow>* manager, ACharacter* obj);
 };
 
 template <class type, class infoType>
@@ -159,13 +159,13 @@ class GRightClickObjectMenu : public GDropDownMenu {
   GContainerSystem* _CS;
 
   GInfoManager<APhysicObjectBase, GObjectInfoWindow>* _IM;
-  GInfoManager<ACharacterBase, GCharacterInfoWindow>* _CIM;
+  GInfoManager<ACharacter, GCharacterInfoWindow>* _CIM;
 
 public:
   GScriptEditor* ScriptEditor = 0;
   GRightClickObjectMenu(GGUI& gui, AWorldBase* world, GContainerSystem* CS,
      GInfoManager<APhysicObjectBase, GObjectInfoWindow>*,
-     GInfoManager<ACharacterBase, GCharacterInfoWindow>* CIM);
+     GInfoManager<ACharacter, GCharacterInfoWindow>* CIM);
   void SetObject(APhysicObjectBase* obj) { _obj = obj; }
 };
 

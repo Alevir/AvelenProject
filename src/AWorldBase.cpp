@@ -29,11 +29,15 @@
 #include "ALocationBase.h"
 #include "ADebugOutput.h"
 #include "AScriptWrapper.hpp"
-#include "ACharacterBase.h"
+#include "ACharacter.h"
 #include "AContactListener.h"
 #include <cstdio>
 #include "Common.h"
 #include "Global.h"
+#include "ANonCharacterLogicObject.hpp"
+#include "AObjectPotion.hpp"
+#include "AObjectArmor.hpp"
+#include "AObjectWeapon.hpp"
 using namespace libconfig;
 using namespace std;
 
@@ -112,10 +116,10 @@ void AWorldBase::Save(const string& path) {
   using namespace libconfig;
   Config cfg;
   cfg.readFile((mapPath + "main.map").c_str());
-  auto v = GetPlayer()->GetPosition();
-  findLocation(v.x, v.y);
-  cfg.lookup("startX") = int(v.x);
-  cfg.lookup("startY") = int(v.y);
+  auto v = GetPlayer()->GetTransform();
+  findLocation(v.X, v.Y);
+  cfg.lookup("startX") = int(v.X);
+  cfg.lookup("startY") = int(v.Y);
   cfg.lookup("topID") = (long long int)uniqueIDManager.GetTop();
   cfg.writeFile((mapPath + "main.map").c_str());
 
@@ -298,7 +302,36 @@ void AWorldBase::prepareForLoading(const string& path) {
     }
   } else {
     UnpackSave(path, "../workspace/");
+    }
+}
+
+APhysicObjectBase*AWorldBase::createObject(const APhysicObjectData& data, ALocationBase* loc, const ObjectInitArgs& args) {
+  APhysicObjectBase* obj = 0;
+  switch(data.objectType) {
+
+  case APhysicObjectData::OT_Other:
+  case APhysicObjectData::OT_Bag:
+  case APhysicObjectData::OT_Bottle:
+    return new ANonCharacterLogicObject(data, loc, args);
+  case APhysicObjectData::OT_Character:
+    return new ACharacter(static_cast<const ACharacterData&>(data), loc, args);
+  case APhysicObjectData::OT_Armor:
+    return new AObjectArmor(data, loc, args);
+  case APhysicObjectData::OT_Weapon:
+    return new AObjectWeapon(data, loc, args);
+  case APhysicObjectData::OT_Potion:
+    return new AObjectPotion(data, loc, args);
+  default:
+    throw std::logic_error("cant create object: wrong type");
   }
+}
+
+void AWorldBase::setDrawer(APhysicObjectBase* obj, AObjectDrawer* drawer) {
+  obj->mDrawer = drawer;
+}
+
+AObjectDrawer*AWorldBase::getDrawer(APhysicObjectBase* obj) {
+  return obj->mDrawer;
 }
 
 void AWorldBase::Load(const string& savePath) {

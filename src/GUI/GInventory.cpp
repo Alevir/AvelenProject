@@ -25,7 +25,7 @@
 #include <ADebugOutput.h>
 #include "GContainerSystem.h"
 #include <cstdlib>
-#include "ACharacterBase.h"
+#include "ACharacter.h"
 #include "GInventory.h"
 #include "Global.h"
 typedef unsigned int uint;
@@ -57,7 +57,7 @@ void GInventory::Refresh() {
   GContainer::Refresh();
 }
 
-GInventory::GInventory(ACharacterBase* ch, GGUI& iGui, GContainerSystem *iCs)
+GInventory::GInventory(ACharacter* ch, GGUI& iGui, GContainerSystem *iCs)
     : GContainer(ch->Slots[IS_Bag], iGui, iCs), noBag(*mWindow) {
   character = ch;
   sf::Vector2u size = Game::Window->getSize();
@@ -145,7 +145,7 @@ APhysicObjectBase *GInventory::_invPutObject(InventorySlot sl) {
     }
 
 
-    if(ACharacterBase::CheckSlotCompat(obj, sl)) {
+    if(ACharacter::CheckSlotCompat(obj, sl)) {
 
       if(csystem->sourceStatus == GContainerSystem::InventorySource) {
         csystem->invSource->character->GetObjectFromInventory(csystem->invSource->sourceButton->_slot);
@@ -161,9 +161,9 @@ APhysicObjectBase *GInventory::_invPutObject(InventorySlot sl) {
     }
 
 
-  } catch (ACharacterBase::ExObjectInBag& e) {
+  } catch (ACharacter::ExObjectInBag& e) {
     dout << "Object was put in bag.\n";
-  } catch (ACharacterBase::ExObjectDropped& e) {
+  } catch (ACharacter::ExObjectDropped& e) {
     dout << "Object dropped!\n";
   }
   Refresh();
@@ -233,7 +233,7 @@ void GPlayerInventory::Hide() {
   csystem->CloseAll();
 }
 
-GPlayerInventory::GPlayerInventory(ACharacterBase *ch, GGUI& iGui, GContainerSystem *iCs)
+GPlayerInventory::GPlayerInventory(ACharacter *ch, GGUI& iGui, GContainerSystem *iCs)
 : GInventory(ch, iGui, iCs) {
 
 //panel->bindCallback(&GPlayerInventory::onClose, this, tgui::ChildWindow::Closed);

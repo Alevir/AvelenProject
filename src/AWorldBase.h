@@ -35,7 +35,7 @@ typedef long long unsigned int UniqueID;
 #include <Box2D/Box2D.h>
 #include <libconfig.h++>
 class AScriptWrapper;
-class ACharacterBase;
+class ACharacter;
 class ALocationBase;
 class APhysicObjectBase;
 class APhysicObjectData;
@@ -43,6 +43,7 @@ class AContactListener;
 class ACharacterData;
 class ContextLocArgs;
 class ObjectInitArgs;
+class AObjectDrawer;
 #include "AVector2.h"
 #include "AIDManager.h"
 
@@ -96,7 +97,9 @@ protected:
 
   virtual ALocationBase* newLocation(libconfig::Config& locationDesc, const ContextLocArgs& la) = 0;
 
-
+  APhysicObjectBase* createObject(const APhysicObjectData& data, ALocationBase* loc, const ObjectInitArgs& args);
+  void setDrawer(APhysicObjectBase* obj, AObjectDrawer* drawer);
+  AObjectDrawer* getDrawer(APhysicObjectBase* obj);
 
   struct timeControlData {
     ptime curTime;
@@ -121,13 +124,13 @@ protected:
 
 
   ALocationBase* currentLoc;
-  virtual APhysicObjectBase* CreateObject(std::string iTemplateName, ALocationBase* loc, const ObjectInitArgs& args) = 0;
-  virtual ACharacterBase* CreateCharacter(const ACharacterData* data, ALocationBase* loc, const ObjectInitArgs& args) = 0;
+  virtual APhysicObjectBase* CreateObject(const APhysicObjectData& data, ALocationBase* loc, const ObjectInitArgs& args) = 0;
+//  virtual ACharacter* CreateCharacter(const ACharacterData* data, ALocationBase* loc, const ObjectInitArgs& args) = 0;
   virtual void RemoveObject(APhysicObjectBase* obj);
 
   AIDManager<APhysicObjectBase> idManager;
   UniqueIDManager uniqueIDManager;
-  ACharacterBase* player = 0;
+  ACharacter* player = 0;
   b2World* physicWorld;
   AScriptWrapper* scriptWrapper = 0;
 
@@ -137,7 +140,7 @@ public:
   const std::string locationsPath = "../resources/locations/";
   AScriptWrapper& GetScriptWrapper();
   double GetLogicFrameLength() { return physicTCD.frameLength; }
-  ACharacterBase* GetPlayer() { return player; }
+  ACharacter* GetPlayer() { return player; }
 
 
   AWorldBase();
@@ -161,7 +164,7 @@ public:
 
   void LoadLocation(int x, int y);
   ALocationBase* FindLocationByCoords(double x, double y) {
-    AVector2 v;
+    AVector2 v(x, y);
     findLocation(v.x, v.y);
     return getLocation(int(v.x), int(v.y));
   }

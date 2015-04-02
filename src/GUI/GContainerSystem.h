@@ -30,7 +30,7 @@ class GContainer;
 class GInventory;
 class GPlayerInventory;
 #include <TGUI/TGUI.hpp>
-#include "ACharacterBase.h"
+#include "ACharacter.h"
 class GGUI;
 
 class GContainerSystem {
@@ -41,7 +41,7 @@ protected:
   friend class GContainer;
   friend class GInventory;
   std::map<APhysicObjectBase*, GContainer*> conts;
-  std::map<ACharacterBase*, GInventory*> invs;
+  std::map<ACharacter*, GInventory*> invs;
   enum SourceStatus {
     NoSource,
     InventorySource,
@@ -68,12 +68,12 @@ public:
 
   GContainerSystem(GGUI& iGui);
 
-  GInventory* AddInventory(ACharacterBase* ch);
+  GInventory* AddInventory(ACharacter* ch);
   GContainer* AddContainer(APhysicObjectBase* obj);
 
   GContainer* GetContainer(APhysicObjectBase* obj);
 
-  void RemoveInventory(ACharacterBase* ch);
+  void RemoveInventory(ACharacter* ch);
   void RemoveContainer(APhysicObjectBase* obj);
 
   virtual ~GContainerSystem();
@@ -105,7 +105,7 @@ class GInGameContainerSystem : public GContainerSystem {
 
 public:
   GInGameContainerSystem(GGUI& iGui);
-  void AddPlayerInventory(ACharacterBase* player);
+  void AddPlayerInventory(ACharacter* player);
 
   GPlayerInventory* GetPlayerInventory() { return mPLI; }
   ~GInGameContainerSystem();

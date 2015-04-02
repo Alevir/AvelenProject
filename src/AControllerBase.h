@@ -23,7 +23,7 @@
 
 #ifndef ACONTROLLERBASE_H
 #define ACONTROLLERBASE_H
-class ACharacterBase;
+class ACharacter;
 
 enum class Controllers : unsigned int {
   NoController = 0,
@@ -41,7 +41,7 @@ protected:
 
   const char RIGHT = 0;
   const char LEFT = 1;
-  ACharacterBase* character;
+  ACharacter* character;
   void moveForward();
   void moveBack();
   void moveRight();
@@ -56,7 +56,7 @@ public:
   virtual void SetEnabled(bool v) {}
   virtual bool Switch() { return true; }
   virtual unsigned int GetType() const = 0;
-  AControllerBase(ACharacterBase* iNPC);
+  AControllerBase(ACharacter* iNPC);
   virtual void Step(double dt) final;
   virtual ~AControllerBase() {}
 

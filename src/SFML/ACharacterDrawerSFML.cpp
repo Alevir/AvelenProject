@@ -1,5 +1,6 @@
 /*
     This file is part of Avelen Project.
+    Copyright (c) 2014  Evdokimov Mikhail
 
     Avelen Project is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,26 +15,16 @@
     You should have received a copy of the GNU General Public License
     along with Avelen Project.  If not, see <http://www.gnu.org/licenses/>.
 
-    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-    Authors of file: Mikhail Evdokimov
-
-    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 */
+#include "ACharacterDrawerSFML.hpp"
+#include "ACharacter.h"
 
-#ifndef AOBJECT_H
-#define AOBJECT_H
 
-typedef unsigned char byte;
+ACharacterDrawerSFML::ACharacterDrawerSFML(ALocationBase* loc, ACharacter* obj)
+    : AObjectDrawerSFML(loc, obj) {
 
-class RemovableObject {
+}
 
-};
-
-class AObject : public RemovableObject {
-
-public:
-  virtual ~AObject() {}
-};
-
-#endif // AOBJECT_H
+void ACharacterDrawerSFML::Draw(double dt) {
+  AObjectDrawerSFML::Draw(dt);
+}

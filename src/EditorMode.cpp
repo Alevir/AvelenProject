@@ -54,7 +54,9 @@ void EditorMode::_run() {
   double e = 0.02;
   //_world.Camera.BindToObj(dynamic_cast<APhysicObjectSFML*>(_world.GetPlayer()));
   //_world.Camera.Unbind();
-  world.Camera.SetPosition(world.GetPlayer()->GetPosition());
+  ATransform tr;  world.GetPlayer()->GetTransform(tr);
+  tr.A = 0;
+  world.Camera.SetTransform(tr);
   while(window->isOpen()) {
     sf::Event event;
     while(window->pollEvent(event)) {

@@ -23,7 +23,7 @@
 
 #ifndef ACOMBATMODELBASE_H
 #define ACOMBATMODELBASE_H
-#include "ACharacterBase.h"
+#include "ACharacter.h"
 
 enum class CombatModels : unsigned int {
   Human = 0
@@ -31,13 +31,13 @@ enum class CombatModels : unsigned int {
 
 struct HitData {
   HitPosition position;
-  ACharacterBase* attacker;
+  ACharacter* attacker;
   double damage = 0.0;
 };
 
 class ACombatModelBase {
 protected:
-  ACharacterBase * const mCharacter;
+  ACharacter * const mCharacter;
   virtual HitData dealDamage(const AttackData& attack) = 0;
   virtual void recieveDamage(const HitData& hit) = 0;
   std::vector<Action*> mActions;
@@ -46,19 +46,19 @@ protected:
   double decreaseEP(double value);
 
   double& getHitPoints(APhysicObjectBase* obj) {
-    return obj->HitPoints;
+    return obj->mHitPoints;
   }
 
   double& getSharpness(APhysicObjectBase* obj) {
-    assert(obj->templateData.objectType == APhysicObjectData::OT_Weapon);
-    return obj->Sharpness;
+    assert(obj->mTemplateData.objectType == APhysicObjectData::OT_Weapon);
+    return obj->mSharpness;
   }
 
 public:
   virtual void GenerateAction(int type) = 0;
   virtual void Step(double dt) final;
-  virtual void Attack(ACharacterBase* target, const AttackData& data) final;
-  ACombatModelBase(ACharacterBase* iCharacter);
+  virtual void Attack(ACharacter* target, const AttackData& data) final;
+  ACombatModelBase(ACharacter* iCharacter);
   virtual unsigned int GetType() const = 0;
   virtual ~ACombatModelBase() {}
 

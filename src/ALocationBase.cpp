@@ -35,7 +35,7 @@
 #include "AObjectFilter.hpp"
 #include "AGroundCell.h"
 #include "APhysicObjectBase.h"
-#include "ACharacterBase.h"
+#include "ACharacter.h"
 #include "Common.h"
 #include <cmath>
 
@@ -48,12 +48,18 @@ std::map<std::string, AGroundCell*> ALocationBase::scriptGroundContainer;
 
 void ALocationBase::Step(double dt) {
   ALocationBase* loc;
+  ACharacter* ch;
+  APhysicObjectBase* obj;
 
-  auto cit = mLocalCharacters.begin();
+  auto cit = mLocalObjects.begin();
   decltype(cit) ceit;
-  while(cit != mLocalCharacters.end()) {
-    ACharacterBase* obj = *cit;
-    if(obj->mHP <= 0.0) {
+  while(cit != mLocalObjects.end()) {
+    obj = *cit;
+    ch = 0;
+    if(obj->GetTemplateData()->objectType == APhysicObjectData::OT_Character) {
+      ch = static_cast<ACharacter*>(obj);
+    }
+    /*if(obj->mHP <= 0.0) {
       world->RemoveObject(obj);
       obj->Destroy();
       ceit = cit;
@@ -61,12 +67,10 @@ void ALocationBase::Step(double dt) {
       mLocalCharacters.erase(ceit);
       delete obj;
       continue;
-    }
-
-    double x = obj->GetX();
-    double y = obj->GetY();
-    if(x > msx && y > msy && x < (mXLen * cellSize + msx) && y < (mYLen * cellSize + msy)) {
-      obj->SetDamping(mGround[int(x / cellSize) % mXLen][int(y / cellSize)  % mYLen]->Damping);
+    }*/
+    ATransform tr; obj->GetTransform(tr);
+    if(tr.X > msx && tr.Y > msy && tr.X < (mXLen * cellSize + msx) && tr.Y < (mYLen * cellSize + msy)) {
+      obj->SetDamping(mGround[int(tr.X / cellSize) % mXLen][int(tr.Y / cellSize)  % mYLen]->Damping);
     }
     obj->Step(dt);
 
@@ -79,46 +83,50 @@ void ALocationBase::Step(double dt) {
     }
 
     if(loc) {
-      if(*cit == world->GetPlayer()) {
-        world->currentLoc = loc;
+      if(ch) {
+        if(ch == world->GetPlayer()) {
+          world->currentLoc = loc;
+        }
+        transferCharacter(cit, loc);
+      } else {
+        transferObj(cit, loc);
       }
-      transferCharacter(cit, loc);
-      if(cit == mLocalCharacters.end()) break;
+      if(cit == mLocalObjects.end()) break;
       ++cit;
       continue;
     } else {
-      AVector2 p(obj->GetPosition());
+      ATransform p;
+      obj->GetTransform(p);
       if(xx > mlx) {
-        p.x = msx + mXLen * cellSize;
+        p.X = msx + mXLen * cellSize;
       } else
       if(xx < mlx){
-        p.x = msx;
+        p.X = msx;
       }
       if(yy > mly) {
-        p.y = msy + mYLen * cellSize;
+        p.Y = msy + mYLen * cellSize;
       } else
       if(yy < mly) {
-        p.y = msy;
+        p.Y = msy;
       }
-      obj->SetPosition(p);
+      obj->SetTransform(p);
     }
     ++cit;
   }
 
-
+/*
   auto oit = mLocalObjects.begin();
   decltype(oit) oeit;
   while(oit != mLocalObjects.end()) {
     APhysicObjectBase* obj = *oit;
-    if(obj->containingObject) {
+    if(obj->mContainingObject) {
      ++oit;
      continue;
     }
 
-    double x = obj->GetX();
-    double y = obj->GetY();
-    if(x > msx && y > msy && x < (mXLen * cellSize + msx) && y < (mYLen * cellSize + msy)) {
-      obj->SetDamping(mGround[int(x / cellSize) % mXLen][int(y / cellSize)  % mYLen]->Damping);
+    ATransform tr; obj->GetTransform(tr);
+    if(tr.X > msx && tr.Y > msy && tr.X < (mXLen * cellSize + msx) && tr.Y < (mYLen * cellSize + msy)) {
+      obj->SetDamping(mGround[int(tr.X / cellSize) % mXLen][int(tr.Y / cellSize)  % mYLen]->Damping);
     }
     obj->Step(dt);
 
@@ -152,7 +160,7 @@ void ALocationBase::Step(double dt) {
     }
     ++oit;
 
-  }
+  }*/
   mScrCont.Step(dt);
 }
 
@@ -175,10 +183,6 @@ ALocationBase::~ALocationBase() {
     world->RemoveObject(obj);
     delete obj;
   }
-  for(ACharacterBase* obj : mLocalCharacters) {
-    world->RemoveObject(obj);
-    delete obj;
-  }
   for(int i = 0; i < mXLen; i++) {
     delete[] mGround[i];
   }
@@ -187,39 +191,41 @@ ALocationBase::~ALocationBase() {
 
 
 
-APhysicObjectBase* ALocationBase::AddObject(std::string iTemplateName, ObjectInitArgs& args) {
+APhysicObjectBase* ALocationBase::AddObject(const APhysicObjectData& data, ObjectInitArgs& args) {
   APhysicObjectBase* obj;
   args.Coords = true;
-  obj = world->CreateObject(iTemplateName, this, args);
+  obj = world->CreateObject(data, this, args);
   mLocalObjects.insert(obj);
   return obj;
 }
 
-APhysicObjectBase* ALocationBase::AddObject(std::string iTemplateName, APhysicObjectBase* container, ObjectInitArgs& args) {
+APhysicObjectBase* ALocationBase::AddObject(const APhysicObjectData& data, APhysicObjectBase* container, ObjectInitArgs& args) {
   APhysicObjectBase* obj;
   args.Coords = false;
-  obj = world->CreateObject(iTemplateName, this, args);
+  obj = world->CreateObject(data, this, args);
   container->AddObjectToContainer(obj);
   mLocalObjects.insert(obj);
   return obj;
 }
 
-APhysicObjectBase* ALocationBase::AddObject(std::string iTemplateName, ACharacterBase* character, InventorySlot slot, ObjectInitArgs& args) {
+APhysicObjectBase* ALocationBase::AddObject(const APhysicObjectData& data, ACharacter* character, InventorySlot slot, ObjectInitArgs& args) {
   APhysicObjectBase* obj;
   args.Coords = false;
-  obj = world->CreateObject(iTemplateName, this, args);
+  obj = world->CreateObject(data, this, args);
   character->DirectEquip(obj, slot);
   mLocalObjects.insert(obj);
   return obj;
 }
 
-ACharacterBase* ALocationBase::AddCharacter(const ACharacterData* chd, ObjectInitArgs& args) {
-  ACharacterBase* ch;
+
+/*
+ACharacter* ALocationBase::AddCharacter(const ACharacterData* chd, ObjectInitArgs& args) {
+  ACharacter* ch;
   args.Coords = true;
   ch = world->CreateCharacter(chd, this, args);
   mLocalCharacters.insert(ch);
   return ch;
-}
+}*/
 
 
 
@@ -260,13 +266,13 @@ void ALocationBase::loadLocationFromCfg(libconfig::Config& loc, const ContextLoc
   for(int k = 0; k < objects.getLength(); k++) {
     libconfig::Setting& s = objects[k];
     ObjectInitArgs ia;
-    ia.x = (double)s["x"] + msx;
-    ia.y = (double)s["y"] + msy;
-    ia.angle = s["angle"];
-    ia.z = s["z"];
+    ia.Tr.X = (double)s["x"] + msx;
+    ia.Tr.Y = (double)s["y"] + msy;
+    ia.Tr.A = s["angle"];
+    ia.Z = s["z"];
     ia.ID = (int)s["id"];
     ia.UnID = (int)s["scrID"];
-    APhysicObjectBase* obj = AddObject((const char*)s["templateName"], ia);
+    APhysicObjectBase* obj = AddObject(Game::ObjectTemplatesContainer->GetTemplate((const char*)s["templateName"]), ia);
     _readObject(s, obj);
     _readContainer(s["container"], obj);
   }
@@ -282,14 +288,14 @@ void ALocationBase::loadLocationFromCfg(libconfig::Config& loc, const ContextLoc
     c.lookupValue("lvl", chd.Level);
 
     ObjectInitArgs ia;
-    ia.x = (double)c["x"] + msx;
-    ia.y = (double)c["y"] + msy;
-    ia.angle = c["angle"];
-    ia.z = c["z"];
+    ia.Tr.X = (double)c["x"] + msx;
+    ia.Tr.Y = (double)c["y"] + msy;
+    ia.Tr.A = c["angle"];
+    ia.Z = c["z"];
     ia.ID = (int)c["id"];
     ia.UnID = (int)c["scrID"];
 
-    ACharacterBase* ch = AddCharacter(&chd, ia);
+    ACharacter* ch = static_cast<ACharacter*>(AddObject(chd, ia));
     _readObject(c, ch);
     c.lookupValue("HP", ch->mHP);
     c.lookupValue("EP", ch->mEP);
@@ -323,7 +329,7 @@ void ALocationBase::loadLocationFromCfg(libconfig::Config& loc, const ContextLoc
       if(sc.lookupValue("templateName", name)) {
         ia.ID = (int)sc["id"];
         ia.UnID = (int)sc["scrID"];
-        ch->Slots[i] = AddObject(name, ch, InventorySlot(i), ia);
+        ch->Slots[i] = AddObject(Game::ObjectTemplatesContainer->GetTemplate(name), ch, InventorySlot(i), ia);
         _readObject(sc, ch->Slots[i]);
         _readContainer(sc["container"], ch->Slots[i]);
       }
@@ -347,9 +353,10 @@ void ALocationBase::loadLocationFromCfg(libconfig::Config& loc, const ContextLoc
 
 ALocationBase* ALocationBase::boundsTest(APhysicObjectBase* obj, int& x, int& y) {
 
-  x = floor(obj->GetX() / mXLen);
+  ATransform tr; obj->GetTransform(tr);
+  x = floor(tr.X / mXLen);
   if(x > -1) ++x;
-  y = floor(obj->GetY() / mYLen);
+  y = floor(tr.Y / mYLen);
   if(y > -1) ++y;
 
   return world->getLocation(x, y);
@@ -361,7 +368,7 @@ void ALocationBase::transferObj(APhysicObjectBase* obj, set<APhysicObjectBase*>:
   if(it == mLocalObjects.end()) throw std::logic_error("no object");
   dest->mLocalObjects.insert(obj);
   obj->mLoc = dest;
-  for(APhysicObjectBase* p : obj->container) {
+  for(APhysicObjectBase* p : obj->mContainer) {
     transferObj(p, validIt, dest);
   }
   if(validIt == it) --validIt;
@@ -370,7 +377,6 @@ void ALocationBase::transferObj(APhysicObjectBase* obj, set<APhysicObjectBase*>:
 
 void ALocationBase::transferObj(set<APhysicObjectBase*>::iterator& it, ALocationBase* dest) {
   APhysicObjectBase* obj = *it;
-  set<APhysicObjectBase*>::iterator eit;
 
   if(it == mLocalObjects.begin()) {
     transferObj(obj, it, dest);
@@ -381,8 +387,8 @@ void ALocationBase::transferObj(set<APhysicObjectBase*>::iterator& it, ALocation
 
 }
 
-void ALocationBase::transferCharacter(std::set<ACharacterBase*>::iterator& it, ALocationBase* dest) {
-  ACharacterBase* obj = *it;
+void ALocationBase::transferCharacter(std::set<APhysicObjectBase*>::iterator& it, ALocationBase* dest) {
+  ACharacter* obj = static_cast<ACharacter*>(*it);
   set<APhysicObjectBase*>::iterator oit;
 
   for(int i = 0; i < InventorySize; ++i) {
@@ -391,15 +397,15 @@ void ALocationBase::transferCharacter(std::set<ACharacterBase*>::iterator& it, A
       transferObj(obj->Slots[i], oit, dest);
     }
   };
-  dest->mLocalCharacters.insert(obj);
+  dest->mLocalObjects.insert(obj);
   obj->mLoc = dest;
-  for(APhysicObjectBase* p : obj->container) {
+  for(APhysicObjectBase* p : obj->mContainer) {
     oit = mLocalObjects.find(p);
     transferObj(p, oit, dest);
   }
   auto eit = it;
   it++;
-  mLocalCharacters.erase(eit);
+  mLocalObjects.erase(eit);
 }
 
 
@@ -408,16 +414,17 @@ using namespace libconfig;
 void ALocationBase::_writeObject(libconfig::Setting& group, APhysicObjectBase* obj) {
   group.add("templateName", Setting::TypeString) = obj->GetTemplateName().c_str();
   group.add("hitPoints", Setting::TypeFloat) = obj->GetHitPoints();
-  if(obj->templateData.objectType == APhysicObjectData::OT_Weapon) {
+  if(obj->mTemplateData.objectType == APhysicObjectData::OT_Weapon) {
     group.add("sharpness", Setting::TypeFloat) = obj->GetSharpness();
   }
   std::string str = obj->GetNotTranslatedLabel();
   if(str != "") {
     group.add("label", Setting::TypeString) = str;
   }
-  group.add("x", Setting::TypeFloat) = obj->GetX() - msx;
-  group.add("y", Setting::TypeFloat) = obj->GetY() - msy;
-  group.add("angle", Setting::TypeFloat) = obj->GetAngle();
+  ATransform tr; obj->GetTransform(tr);
+  group.add("x", Setting::TypeFloat) = tr.X - msx;
+  group.add("y", Setting::TypeFloat) = tr.Y - msy;
+  group.add("angle", Setting::TypeFloat) = tr.A;
   group.add("z", Setting::TypeFloat) = obj->GetZ();
   group.add("id", Setting::TypeInt) = (int)obj->GetID();
   group.add("scrID", Setting::TypeInt) = (int)obj->GetScriptID();
@@ -429,12 +436,12 @@ void ALocationBase::_writeObject(libconfig::Setting& group, APhysicObjectBase* o
 }
 
 void ALocationBase::_readObject(libconfig::Setting& s, APhysicObjectBase* obj) {
-  if(obj->templateData.objectType == APhysicObjectData::OT_Weapon) {
-    if(s.lookupValue("sharpness", obj->Sharpness)) {
-      if(obj->Sharpness > 1.0 || obj->Sharpness < 0.0) throw std::logic_error("invalid sharpness");
+  if(obj->mTemplateData.objectType == APhysicObjectData::OT_Weapon) {
+    if(s.lookupValue("sharpness", obj->mSharpness)) {
+      if(obj->mSharpness > 1.0 || obj->mSharpness < 0.0) throw std::logic_error("invalid sharpness");
     }
   }
-  s.lookupValue("hitPoints", obj->HitPoints);
+  s.lookupValue("hitPoints", obj->mHitPoints);
   std::string str;
   s.lookupValue("label", str);
   if(str != "") {
@@ -466,16 +473,16 @@ void ALocationBase::_readContainer(libconfig::Setting& cont, APhysicObjectBase* 
     ObjectInitArgs ia;
     ia.ID = (int)s["id"];
     ia.UnID = (int)s["scrID"];
-    APhysicObjectBase* n = AddObject(s["templateName"], obj, ia);
+    APhysicObjectBase* n = AddObject(Game::ObjectTemplatesContainer->GetTemplate((const char*) s["templateName"]), obj, ia);
     _readObject(s, n);
     _readContainer(s["container"], n);
-    }
+  }
 }
 
 
 
 void ALocationBase::_writeContainer(libconfig::Setting& cont, APhysicObjectBase* obj) {
-  for(APhysicObjectBase* o : obj->container) {
+  for(APhysicObjectBase* o : obj->mContainer) {
     Setting& group = cont.add(Setting::TypeGroup);
     _writeObject(group, o);
     _writeContainer(group.add("container", libconfig::Setting::TypeList), o);
@@ -485,6 +492,8 @@ void ALocationBase::_writeContainer(libconfig::Setting& cont, APhysicObjectBase*
 
 void ALocationBase::Save(const std::string& iFileName) {
 
+
+/*
 try {
   libconfig::Config loc;
   libconfig::Setting& s = loc.getRoot();
@@ -509,7 +518,7 @@ try {
   Setting& objList = s.add("objects", libconfig::Setting::TypeList);
 
   for(APhysicObjectBase* obj : mLocalObjects) {
-    if(!obj->containingObject) {
+    if(!obj->mContainingObject) {
       Setting& group = objList.add(Setting::TypeGroup);
       _writeObject(group, obj);
       _writeContainer(group.add("container", libconfig::Setting::TypeList), obj);
@@ -517,7 +526,7 @@ try {
   }
 
   Setting& chList = s.add("characters", libconfig::Setting::TypeList);
-  for(ACharacterBase* obj : mLocalCharacters) {
+  for(ACharacter* obj : mLocalCharacters) {
     Setting& group = chList.add(Setting::TypeGroup);
     group.add("controller", Setting::TypeInt) = (int)(obj->GetController() ? obj->GetController()->GetType() : 0 );
     group.add("combatModel", Setting::TypeInt) = (int)(obj->GetCombatModel()->GetType());
@@ -554,19 +563,14 @@ try {
     cerr << "error: " << ex.what() << endl;
     //throw ex;
   }
-
+*/
 }
 
 
 void ALocationBase::RemoveAObject(APhysicObjectBase* obj) {
   world->RemoveObject(obj);
-  ACharacterBase* ch = dynamic_cast<ACharacterBase*>(obj);
-  if(ch) {
-    mLocalCharacters.erase(mLocalCharacters.find(ch));
-  } else {
-    mLocalObjects.erase(mLocalObjects.find(obj));
-  }
-  std::cerr << obj->GetID() << "  " << obj->GetTemplateName() << "\n";
+  mLocalObjects.erase(mLocalObjects.find(obj));
+  //std::cerr << obj->GetID() << "  " << obj->GetTemplateName() << "\n";
   obj->Destroy();
   delete obj;
 }

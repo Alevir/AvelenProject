@@ -23,7 +23,7 @@
 
 #include "AContactListener.h"
 #include <iostream>
-#include "ACharacterBase.h"
+#include "ACharacter.h"
 #include <assert.h>
 
 #include <ADebugOutput.h>

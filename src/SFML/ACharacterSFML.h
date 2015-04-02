@@ -23,11 +23,11 @@
 
 #ifndef ACHARACTERSFML_H
 #define ACHARACTERSFML_H
-#include "ACharacterBase.h"
+#include "ACharacter.h"/*
 #include "APhysicObjectSFML.h"
 
 class ACharacterSFML
-: public APhysicObjectSFML, public ACharacterBase {
+: public APhysicObjectSFML, public ACharacter {
 
   virtual ~ACharacterSFML() {}
 public:
@@ -37,5 +37,5 @@ public:
 
 
 };
-
+*/
 #endif // ACHARACTERSFML_H

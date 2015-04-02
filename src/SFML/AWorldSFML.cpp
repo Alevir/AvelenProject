@@ -33,6 +33,7 @@
 
 #include "ADebugOutput.h"
 #include "GUI/GInGame.hpp"
+#include "AObjectDrawerSFML.hpp"
 using namespace std;
 double sz;
 
@@ -80,11 +81,8 @@ AWorldSFML::~AWorldSFML() {
 
 void AWorldSFML::_graphicStep(double dt) {
 
-
-
-
   if(!mGrPause) {
-    for(std::pair<double, APhysicObjectSFML*> p : drawContainer) {
+    for(std::pair<double, APhysicObjectBase*> p : drawContainer) {
       p.second->Extrapolate(dt);
     }
   } else {
@@ -111,7 +109,7 @@ void AWorldSFML::_graphicStep(double dt) {
   }
 
 
-  for(std::pair<double, APhysicObjectSFML*> p : drawContainer) {
+  for(std::pair<double, APhysicObjectBase*> p : drawContainer) {
     p.second->Display(dt);
   }
 
@@ -157,27 +155,19 @@ void AWorldSFML::_graphicStep(double dt) {
 }
 
 
-APhysicObjectSFML* AWorldSFML::CreateObject(std::string iTemplateName, ALocationBase *loc,  const ObjectInitArgs& args) {
-  APhysicObjectData* data = &Game::ObjectTemplatesContainer->GetTemplate(iTemplateName);
-  APhysicObjectSFML* obj = new APhysicObjectSFML(data, static_cast<ALocationSFML*> (loc), args);
+APhysicObjectBase* AWorldSFML::CreateObject(const APhysicObjectData& data, ALocationBase *loc,  const ObjectInitArgs& args) {
+  APhysicObjectBase* obj = createObject(data, loc, args);
+  setDrawer(obj, new AObjectDrawerSFML(loc, obj));
   args.Coords ? SetVisible(obj) : SetInvisible(obj);
-  drawContainer.insert(std::pair<double, APhysicObjectSFML*>(args.z, obj));
+  drawContainer.insert(std::pair<double, APhysicObjectBase*>(args.Z, obj));
   return obj;
 }
 
 
 
-ACharacterSFML* AWorldSFML::CreateCharacter(const ACharacterData* chd, ALocationBase *loc, const ObjectInitArgs& args) {
-  ACharacterSFML* ch = new ACharacterSFML(chd, static_cast<ALocationSFML*> (loc), args);
-  SetVisible(ch);
-  drawContainer.insert(std::pair<double, APhysicObjectSFML*>(args.z, ch));
-  return ch;
-}
-
-
 void AWorldSFML::RemoveObject(APhysicObjectBase* obj) {
   auto itp = drawContainer.equal_range(obj->GetZ());
-  Camera.CheckAndUnbind(dynamic_cast<APhysicObjectSFML*>(obj));
+  Camera.CheckAndUnbind(obj);
   while(itp.first != itp.second) {
     if(itp.first->second == obj) {
       drawContainer.erase(itp.first);
@@ -191,6 +181,12 @@ void AWorldSFML::RemoveObject(APhysicObjectBase* obj) {
 
 ALocationBase*AWorldSFML::newLocation(libconfig::Config& locationDesc, const ContextLocArgs& la = ContextLocArgs()) {
 return new ALocationSFML(locationDesc, this, la);
+}
+
+void AWorldSFML::SetFocusedObject(APhysicObjectBase* obj) {
+  if(!obj) return;
+  AObjectDrawerSFML* dr = static_cast<AObjectDrawerSFML*>(getDrawer(obj));
+  dr->flickering = true;
 }
 
 
@@ -247,25 +243,34 @@ currentLoc = new ALocationSFML(cfg, this);
 }
 
 void AWorldSFML::SetVisible(APhysicObjectBase *obj) {
-  APhysicObjectSFML* _obj = dynamic_cast<APhysicObjectSFML*>(obj);
-  _obj->visible = true;
-  auto itp = drawContainer.equal_range(_obj->lastVisZ);
+  //obj->visible = true;
+  /*auto itp = drawContainer.equal_range(obj->lastVisZ);
   while(itp.first != itp.second) {
-    if(itp.first->second == _obj) {
+    if(itp.first->second == obj) {
       drawContainer.erase(itp.first);
-      drawContainer.insert(std::make_pair(_obj->GetZ(), _obj));
+      drawContainer.insert(std::make_pair(obj->GetZ(), obj));
+      break;
+    } else {
+      itp.first++;
+    }
+  }*/
+
+  drawContainer.insert(std::make_pair(obj->GetZ(), obj));
+}
+
+void AWorldSFML::SetInvisible(APhysicObjectBase *obj) {
+  //obj->visible = false;
+  //obj->lastVisZ = _obj->GetZ();
+
+  auto itp = drawContainer.equal_range(obj->GetZ());
+  while(itp.first != itp.second) {
+    if(itp.first->second == obj) {
+      drawContainer.erase(itp.first);
       break;
     } else {
       itp.first++;
     }
   }
-
-}
-
-void AWorldSFML::SetInvisible(APhysicObjectBase *obj) {
-  APhysicObjectSFML* _obj = dynamic_cast<APhysicObjectSFML*>(obj);
-  _obj->visible = false;
-  _obj->lastVisZ = _obj->GetZ();
 }
 
 void AWorldSFML::AddMessage(const wstring& m) {
@@ -278,30 +283,31 @@ void AWorldSFML::AddMessage(const wstring& m) {
 
 
 void ACamera::Step() {
-  if(_obj) {
+  if(mObj) {
     sf::View vv = Game::Window->getView();
-    vv.setCenter(_obj->GetEX() * PIXELS_IN_METER, -_obj->GetEY() * PIXELS_IN_METER);
-    vv.setRotation(- _obj->GetEAngle() * 180 / M_PI);
+    ATransform tr; mObj->GetTransformExtr(tr);
+    vv.setCenter(tr.X * PIXELS_IN_METER, -tr.Y * PIXELS_IN_METER);
+    vv.setRotation(- tr.A * 180 / M_PI);
     Game::Window->setView(vv);
   }
 }
 
-void ACamera::BindToObj(APhysicObjectSFML *obj) {
-  _obj = obj;
+void ACamera::BindToObj(APhysicObjectBase* obj) {
+  mObj = obj;
 }
 
-void ACamera::CheckAndUnbind(APhysicObjectSFML *obj) {
-  if(obj == _obj) {
-    _obj = 0;
+void ACamera::CheckAndUnbind(APhysicObjectBase* obj) {
+  if(obj == mObj) {
+    mObj = 0;
   }
 }
 
 void ACamera::Unbind() {
-  _obj = 0;
+  mObj = 0;
 }
 
 void ACamera::Move(const AVector2 &shift) {
-  if(!_obj) {
+  if(!mObj) {
     sf::View vv = Game::Window->getView();
     auto v = vv.getCenter();
     vv.setCenter(v.x + shift.x * PIXELS_IN_METER, v.y + shift.y  * PIXELS_IN_METER);
@@ -309,9 +315,10 @@ void ACamera::Move(const AVector2 &shift) {
   }
 }
 
-void ACamera::SetPosition(const AVector2 &pos) {
+void ACamera::SetTransform(const ATransform& pos) {
   sf::View vv = Game::Window->getView();
-  vv.setCenter(pos.x * PIXELS_IN_METER, - pos.y * PIXELS_IN_METER);
+  vv.setCenter(pos.X * PIXELS_IN_METER, - pos.X * PIXELS_IN_METER);
+  vv.setRotation(- pos.A * 180.0 / M_PI);
   Game::Window->setView(vv);
 }
 

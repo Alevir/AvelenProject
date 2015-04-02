@@ -14,6 +14,7 @@ INCLUDEPATH += src/Character/
 INCLUDEPATH += src/Common/
 INCLUDEPATH += src/Actions/
 INCLUDEPATH += src/SFML/
+INCLUDEPATH += src/LogicObjects/
 
 LIBS += -lGLEW  -lBox2D -lsfml-system -lsfml-window -lsfml-graphics -lsfml-audio -lboost_system \
  -lboost_thread \
@@ -37,7 +38,6 @@ SOURCES += \
     src/AControllerBase.cpp \
     src/AVector2.cpp \
     src/AControllers/AKeyboardControllerSFML.cpp \
-    src/ACharacterBase.cpp \
     src/SFML/ACharacterSFML.cpp \
     src/AContactListener.cpp \
     src/ACombatModelBase.cpp \
@@ -59,7 +59,7 @@ SOURCES += \
     src/ATranslationReader.cpp \
     src/Common/Global.cpp \
     src/GUI/GCommon.cpp \
-    src/ACharacterData.cpp \
+    src/LogicObjects/ACharacterData.cpp \
     src/GUI/GInGame.cpp \
     src/Character/Effects.cpp \
     src/GUI/GPicture.cpp \
@@ -72,7 +72,15 @@ SOURCES += \
     src/AScriptArea.cpp \
     src/GUI/GScriptEditor.cpp \
     src/AControllers/ASimpleAIController.cpp \
-    src/AGarbageCollector.cpp
+    src/AGarbageCollector.cpp \
+    src/SFML/AObjectDrawerSFML.cpp \
+    src/LogicObjects/AObjectArmor.cpp \
+    src/LogicObjects/AObjectPotion.cpp \
+    src/LogicObjects/AObjectWeapon.cpp \
+    src/LogicObjects/ANonCharacterLogicObject.cpp \
+    src/LogicObjects/ACharacter.cpp \
+    src/AObjectDrawer.cpp \
+    src/SFML/ACharacterDrawerSFML.cpp
 
 OTHER_FILES += \
     resources/characters.xml \
@@ -109,7 +117,6 @@ HEADERS += \
     src/SFML/AControllerSFML.h \
     src/icon.h \
     src/AControllers/AKeyboardControllerSFML.h \
-    src/ACharacterBase.h \
     src/SFML/ACharacterSFML.h \
     src/AContactListener.h \
     src/ACombatModelBase.h \
@@ -132,7 +139,7 @@ HEADERS += \
     src/ATranslationReader.h \
     src/GUI/GCommon.h \
     src/AObjectTemplatesContainer.h \
-    src/ACharacterData.hpp \
+    src/LogicObjects/ACharacterData.hpp \
     src/GUI/GInGame.hpp \
     src/Character/Effects.hpp \
     src/SinglePlayerMode.hpp \
@@ -146,5 +153,13 @@ HEADERS += \
     src/AObjectFilter.hpp \
     src/GUI/GScriptEditor.hpp \
     src/AControllers/ASimpleAIController.hpp \
-    src/AGarbageCollector.hpp
+    src/AGarbageCollector.hpp \
+    src/LogicObjects/ANonCharacterLogicObject.hpp \
+    src/AObjectDrawer.hpp \
+    src/SFML/AObjectDrawerSFML.hpp \
+    src/LogicObjects/AObjectPotion.hpp \
+    src/LogicObjects/ACharacter.h \
+    src/LogicObjects/AObjectWeapon.hpp \
+    src/LogicObjects/AObjectArmor.hpp \
+    src/SFML/ACharacterDrawerSFML.hpp
 

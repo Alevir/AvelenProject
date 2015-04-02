@@ -28,11 +28,12 @@ class GPlayerInterface;
 #include "AWorldBase.h"
 
 #include <map>
-#include "ACharacterSFML.h"
-class ACharacterSFML;
+//#include "ACharacter.h"
 class ALocationSFML;
 class ASprite;
 #include <SFML/Audio.hpp>
+#include <SFML/Graphics.hpp>
+class ATransform;
 
 
 
@@ -50,25 +51,26 @@ public:
 };
 
 class ACamera {
-  APhysicObjectSFML* _obj = 0;
+  APhysicObjectBase* mObj = 0;
 public:
   void Step();
-  void BindToObj(APhysicObjectSFML* obj);
-  void CheckAndUnbind(APhysicObjectSFML* obj);
+  void BindToObj(APhysicObjectBase* obj);
+  void CheckAndUnbind(APhysicObjectBase* obj);
   void Unbind();
   void Move(const AVector2& shift);
-  void SetPosition(const AVector2& pos);
+  void SetTransform(const ATransform& pos);
   AVector2 GetPosition();
 };
 
+class AObjectDrawerSFML;
 
 class AWorldSFML : public AWorldBase {
   friend class ALocationSFML;
   friend class APhysicObjectSFML;
-  std::multimap<double, APhysicObjectSFML*> drawContainer;
+  friend class AObjectDrawerSFML;
+  std::multimap<double, APhysicObjectBase*> drawContainer;
   virtual void _graphicStep(double dt);
-  APhysicObjectSFML* CreateObject(std::string iTemplateName, ALocationBase* loc, const ObjectInitArgs& args);
-  ACharacterSFML* CreateCharacter(const ACharacterData* data, ALocationBase *loc, const ObjectInitArgs& args);
+  APhysicObjectBase* CreateObject(const APhysicObjectData& data, ALocationBase* loc, const ObjectInitArgs& args);
   virtual void RemoveObject(APhysicObjectBase* obj);
   sf::Listener listener;
   ALocationBase* newLocation(libconfig::Config& locationDesc, const ContextLocArgs& la);
@@ -93,6 +95,7 @@ class AWorldSFML : public AWorldBase {
 
   std::list<drawData> mPreparedSprites;
 public:
+  void SetFocusedObject(APhysicObjectBase* obj);
   static void ParseColor(const char* str, sf::Color& color);
   void OneStepPause();
 

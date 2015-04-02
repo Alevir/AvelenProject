@@ -39,8 +39,8 @@
 
 
 void SinglePlayerMode::ResetPlayer() {
-  ACharacterBase* player = world.GetPlayer();
-  world.Camera.BindToObj(dynamic_cast<APhysicObjectSFML*>(player));
+  ACharacter* player = world.GetPlayer();
+  world.Camera.BindToObj(player);
   Interface.SetPlayer(player);
   plInv = GCS.GetPlayerInventory();
   //world.GetPlayer()->SwitchController();
@@ -52,7 +52,7 @@ Interface(world.GetPlayer(), control) {
   GCS.TransferDistance = 1.0;
   window->setMouseCursorVisible(false);
 
-  world.Camera.BindToObj(dynamic_cast<APhysicObjectSFML*>(world.GetPlayer()));
+  world.Camera.BindToObj(world.GetPlayer());
   world.Interface = &Interface;
   world.GetPlayer()->SwitchController();
   GCS.AddPlayerInventory(world.GetPlayer());
@@ -131,7 +131,7 @@ void SinglePlayerMode::_run() {
                   GCS.AddContainer(obj);
                   control.Show(plInv);
 
-                } else if(! dynamic_cast<ACharacterBase*>(obj)) {
+                } else if(! dynamic_cast<ACharacter*>(obj)) {
                   world.GetPlayer()->AddObjectToBag(obj);
                   plInv->Refresh();
                 }
@@ -220,13 +220,17 @@ float32 SinglePlayerMode::FocusRayCast::ReportFixture(b2Fixture *fixture, const 
 
 void SinglePlayerMode::FocusRayCast::Step() {
   foundObjects.clear();
-  ACharacterBase* character = mode->world.GetPlayer();
+  ACharacter* character = mode->world.GetPlayer();
+
+  ATransform tr;
+  character->GetTransform(tr);
   AVector2 near(0.0, 0.1);
-  near.Rotate(character->GetAngle());
+  near.Rotate(tr.A);
   AVector2 far(0.0, 0.5);
-  far.Rotate(character->GetAngle());
-  far = far + character->GetPosition();
-  near = near + character->GetPosition();
+  far.Rotate(tr.A);
+  far.x += tr.X; far.y += tr.Y;
+  near.x += tr.X; near.y += tr.Y;
+
   mode->world.RayCast(this, near, far);
   if(foundObjects.empty()) {
     focusedObject = 0;
@@ -236,7 +240,7 @@ void SinglePlayerMode::FocusRayCast::Step() {
   if(it == foundObjects.end()) {
     focusedObject = *foundObjects.begin();
   }
-  dynamic_cast<APhysicObjectSFML*>(focusedObject)->SetFlickering(true);
+  mode->world.SetFocusedObject(focusedObject);
 }
 
 void SinglePlayerMode::FocusRayCast::ChooseNextObject() {

@@ -20,25 +20,25 @@
 #ifndef GINGAME_HPP
 #define GINGAME_HPP
 #include "GUI/GCommon.h"
-#include "ACharacterBase.h"
+#include "ACharacter.h"
 #include "ATranslationReader.h"
 
 
 class GCharacterInfo : public GuiWindowReusable {
   tgui::TextBox::Ptr mInfoName;
   tgui::TextBox::Ptr mInfoValue;
-  ACharacterBase* mChar;
-  ACharacterBase::Info mInfo;
+  ACharacter* mChar;
+  ACharacter::Info mInfo;
 
 public:
-  GCharacterInfo(GGUI& gui, ACharacterBase* ch);
+  GCharacterInfo(GGUI& gui, ACharacter* ch);
   void Refresh();
 
 };
 
 
 class GPlayerInterface {
-  ACharacterBase* mPlayer;
+  ACharacter* mPlayer;
   sf::RectangleShape HPState;
   sf::RectangleShape EPState;
   sf::RectangleShape HPStateFrame;
@@ -75,12 +75,12 @@ class GPlayerInterface {
 
 public:
   GCharacterInfo Info;
-  GPlayerInterface(ACharacterBase* player, GGUI& gui);
+  GPlayerInterface(ACharacter* player, GGUI& gui);
   void SetFocusedObject(APhysicObjectBase* obj);
   void Step(double dt);
   void Draw();
   void AddMessage(const std::wstring& m, double duration);
-  void SetPlayer(ACharacterBase* player) { mPlayer = player; }
+  void SetPlayer(ACharacter* player) { mPlayer = player; }
 };
 
 #endif // GINGAME_HPP

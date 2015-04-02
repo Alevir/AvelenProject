@@ -25,7 +25,7 @@
 #define GINVENTORY_H
 #include "SFML/Graphics.hpp"
 #include "TGUI/TGUI.hpp"
-class ACharacterBase;
+class ACharacter;
 class GContainerSystem;
 class GInGameContainerSystem;
 #include "GContainer.h"
@@ -35,7 +35,7 @@ class GInventory : public GContainer {
   friend class GContainerSystem;
   friend class GContainer;
 protected:
-  ACharacterBase* character;
+  ACharacter* character;
   void _setUsed();
 
   class ItemButton : public tgui::Button{
@@ -73,9 +73,9 @@ protected:
   APhysicObjectBase* GetSourceObject();
   void SetBag(APhysicObjectBase* bag);
   ~GInventory();
-  GInventory(ACharacterBase* ch, GGUI& iGui, GContainerSystem* iCs);
+  GInventory(ACharacter* ch, GGUI& iGui, GContainerSystem* iCs);
 public:
-  ACharacterBase* GetCharacter() { return character; }
+  ACharacter* GetCharacter() { return character; }
   void Refresh();
 
 
@@ -87,7 +87,7 @@ class GPlayerInventory : public GInventory {
 
 public:
   void Hide();
-  GPlayerInventory(ACharacterBase* ch, GGUI& iGui, GContainerSystem* iCs);
+  GPlayerInventory(ACharacter* ch, GGUI& iGui, GContainerSystem* iCs);
   ~GPlayerInventory();
 };
 

@@ -22,7 +22,7 @@
 */
 
 #include "CombatActions.h"
-#include "ACharacterBase.h"
+#include "ACharacter.h"
 #include "AWorldBase.h"
 #include "ACombatModelBase.h"
 #include <iostream>
@@ -38,25 +38,27 @@ float32 AttackAction::RayCastCallback::ReportFixture(b2Fixture* fixture, const b
 
 AttackAction::RayCastCallback::RayCastCallback(AttackAction *iAction) : action(iAction) {}
 
-AttackAction::AttackAction(double delay, ACharacterBase *iCharacter, HitPosition pos)
+AttackAction::AttackAction(double delay, ACharacter *iCharacter, HitPosition pos)
     : DisposableAction(delay), pos(pos), rcc(this) {
   character = iCharacter;
 
 }
 
 void AttackAction::Activate() {
+  ATransform tr;
+  character->GetTransform(tr);
   AVector2 near(0.0, 0.1);
-  near.Rotate(character->GetAngle());
+  near.Rotate(tr.A);
   AVector2 far(0.0, 1.5);
-  far.Rotate(character->GetAngle());
-  far = far + character->GetPosition();
-  near = near + character->GetPosition();
-  character->world->RayCast(&rcc, near, far);
+  far.Rotate(tr.A);
+  far.x += tr.X; far.y += tr.Y;
+  near.x += tr.X; near.y += tr.Y;
+  character->mWorld->RayCast(&rcc, near, far);
 }
 
 
 bool AttackAction::process(b2Fixture *fixture) {
-  ACharacterBase* c = dynamic_cast<ACharacterBase*> (static_cast<APhysicObjectBase*>(fixture->GetBody()->GetUserData()));
+  ACharacter* c = dynamic_cast<ACharacter*> (static_cast<APhysicObjectBase*>(fixture->GetBody()->GetUserData()));
   if(!c) return false;
   AttackData a;
   a.Pos = pos;

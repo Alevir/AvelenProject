@@ -29,7 +29,7 @@
 
 class EditorMode : public WorldMode {
   GInfoManager<APhysicObjectBase, GObjectInfoWindow> GOIM;
-  GInfoManager<ACharacterBase, GCharacterInfoWindow> GCIM;
+  GInfoManager<ACharacter, GCharacterInfoWindow> GCIM;
 
 
 

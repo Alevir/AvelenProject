@@ -24,7 +24,7 @@
 #include "ACombatModelBase.h"
 #include "Action.h"
 
-ACombatModelBase::ACombatModelBase(ACharacterBase *iCharacter)
+ACombatModelBase::ACombatModelBase(ACharacter *iCharacter)
     : mCharacter(iCharacter)  {
 }
 
@@ -52,7 +52,7 @@ void ACombatModelBase::Step(double dt)
   }
 }
 
-void ACombatModelBase::Attack(ACharacterBase* target, const AttackData &data) {
+void ACombatModelBase::Attack(ACharacter* target, const AttackData &data) {
   target->mCombatModel->recieveDamage(mCharacter->mCombatModel->dealDamage(data));
 }
 
