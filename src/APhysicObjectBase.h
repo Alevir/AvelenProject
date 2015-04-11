@@ -171,7 +171,7 @@ public:
 
 
   //APhysicObjectBase(const APhysicObjectData &templateData, AWorldBase* iWorld, unsigned int ID);
-  void Step(double dt);
+  virtual void Step(double dt);
 
   unsigned int GetID() { return mID; }
   unsigned int GetScriptID() { return mUniqueID; }
@@ -221,8 +221,8 @@ public:
   const std::vector<std::string>& GetScripts() const;
 
 
-
-  bool CheckForChanges();
+  bool IsVisible();
+  //bool CheckForChanges();
 };
 
 #endif // APHYSICOBJECT_H

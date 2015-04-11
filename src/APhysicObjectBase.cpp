@@ -116,6 +116,7 @@ APhysicObjectBase::APhysicObjectBase(const APhysicObjectData& data, ALocationBas
 
 void APhysicObjectBase::Display(double dt) {
   if(!mDrawer) throw std::logic_error("no drawer");
+  if(mContainingObject) return;
   mDrawer->Draw(dt);
 }
 
@@ -362,7 +363,11 @@ void APhysicObjectBase::ExecuteScript(APhysicObjectBase::ScriptNode sn, APhysicO
 }
 
 const std::vector<std::string>& APhysicObjectBase::GetScripts() const {
-  return mScripts;
+return mScripts;
+}
+
+bool APhysicObjectBase::IsVisible() {
+  return !mContainingObject;
 }
 
 

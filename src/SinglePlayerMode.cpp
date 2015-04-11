@@ -139,7 +139,8 @@ void SinglePlayerMode::_run() {
             }
           } else
           if (event.key.code == sf::Keyboard::Pause) {
-            std::cout << "camera" << world.Camera.GetPosition() << "\n";
+            //std::cout << "camera" << world.Camera.GetPosition() << "\n";
+            assert(0);
           } else
           if (event.key.code == sf::Keyboard::P) {
             debug.Switch();

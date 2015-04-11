@@ -262,7 +262,7 @@ void AWorldSFML::SetInvisible(APhysicObjectBase *obj) {
   //obj->visible = false;
   //obj->lastVisZ = _obj->GetZ();
 
-  auto itp = drawContainer.equal_range(obj->GetZ());
+  /*auto itp = drawContainer.equal_range(obj->GetZ());
   while(itp.first != itp.second) {
     if(itp.first->second == obj) {
       drawContainer.erase(itp.first);
@@ -270,7 +270,16 @@ void AWorldSFML::SetInvisible(APhysicObjectBase *obj) {
     } else {
       itp.first++;
     }
-  }
+  }*/
+  /*
+  auto itp = drawContainer.begin();
+  while(itp != drawContainer.end()) {
+    if(itp->second == obj) {
+      drawContainer.erase(itp);
+      break;
+    }
+    ++itp;
+  }*/
 }
 
 void AWorldSFML::AddMessage(const wstring& m) {
